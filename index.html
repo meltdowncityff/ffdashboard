@@ -43,7 +43,6 @@
     .status-ques { color: #facc15; }
     .status-out { color: #f87171; }
     
-    /* Custom Tabs */
     .custom-tab {
       background: transparent; border: 1px solid #3b4261; color: #94a3b8;
       padding: 8px 16px; border-radius: 8px; font-weight: 600; transition: all 0.2s;
@@ -127,12 +126,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // --- State Variables ---
     let nflPlayersDb = {}; 
     let allLeaguesData = [];
     let isDbLoaded = false;
 
-    // --- Initialization ---
     document.addEventListener('DOMContentLoaded', () => {
       const currentYear = new Date().getMonth() < 2 ? new Date().getFullYear() - 1 : new Date().getFullYear();
       document.getElementById('seasonSelect').innerHTML = `
@@ -144,7 +141,6 @@
       if (savedUser) document.getElementById('usernameInput').value = savedUser;
     });
 
-    // --- UI Helpers ---
     function switchTab(tabId, btnElement) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.custom-tab').forEach(el => el.classList.remove('active'));
@@ -163,7 +159,6 @@
       document.getElementById('loadingIndicator').classList.add('d-none');
     }
 
-    // --- Main Fetch Logic ---
     document.getElementById('fetchBtn').addEventListener('click', async () => {
       const username = document.getElementById('usernameInput').value.trim();
       const season = document.getElementById('seasonSelect').value;
@@ -173,20 +168,23 @@
       showLoading('Fetching User ID...');
       
       try {
-        // 1. Get User
         const userRes = await fetch(`https://api.sleeper.app/v1/user/${username}`);
         const userData = await userRes.json();
         if (!userData || !userData.user_id) throw new Error('User not found.');
 
-        // 2. Fetch Player DB (Huge file, only fetch once per session)
+        // Load DB *before* processing shares so names populate properly.
         if (!isDbLoaded) {
-          showLoading('Downloading NFL Player Database (Takes a few seconds)...');
-          const dbRes = await fetch('https://api.sleeper.app/v1/players/nfl');
-          nflPlayersDb = await dbRes.json();
-          isDbLoaded = true;
+          showLoading('Downloading NFL Player Database (this takes ~5 seconds once per session)...');
+          try {
+            const dbRes = await fetch('https://api.sleeper.app/v1/players/nfl');
+            nflPlayersDb = await dbRes.json();
+            isDbLoaded = true;
+          } catch (dbErr) {
+            console.error("Failed to fetch player database.", dbErr);
+            alert("Could not load player names. The server may be busy.");
+          }
         }
 
-        // 3. Get Leagues
         showLoading(`Fetching ${season} Leagues & Rosters...`);
         const leaguesRes = await fetch(`https://api.sleeper.app/v1/user/${userData.user_id}/leagues/nfl/${season}`);
         const leagues = await leaguesRes.json();
@@ -200,27 +198,36 @@
         allLeaguesData = [];
         let playerShares = {};
 
-        // 4. Get Rosters for every league
+        // Loop through all leagues with try/catch to prevent a single bad league from breaking the script
         for (const lg of leagues) {
-          const rRes = await fetch(`https://api.sleeper.app/v1/league/${lg.league_id}/rosters`);
-          const rosters = await rRes.json();
-          const myRoster = rosters.find(r => r.owner_id === userData.user_id);
-          
-          lg.myRoster = myRoster;
-          allLeaguesData.push(lg);
+          try {
+            const rRes = await fetch(`https://api.sleeper.app/v1/league/${lg.league_id}/rosters`);
+            if (!rRes.ok) continue; // Skip broken leagues silently
+            
+            const rosters = await rRes.json();
+            
+            // Check for standard owner or co-owner
+            const myRoster = rosters.find(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id)));
+            
+            if (myRoster) {
+              lg.myRoster = myRoster;
+              allLeaguesData.push(lg);
 
-          // Tally shares
-          if (myRoster && myRoster.players) {
-            myRoster.players.forEach(pid => {
-              if (!playerShares[pid]) playerShares[pid] = 0;
-              playerShares[pid]++;
-            });
+              if (myRoster.players) {
+                myRoster.players.forEach(pid => {
+                  if (!playerShares[pid]) playerShares[pid] = 0;
+                  playerShares[pid]++;
+                });
+              }
+            }
+          } catch (e) {
+            console.warn(`Could not process league ${lg.name}: `, e);
           }
         }
 
         hideLoading();
         renderLeagues(allLeaguesData);
-        renderPlayers(playerShares, leagues.length);
+        renderPlayers(playerShares, allLeaguesData.length);
 
       } catch (err) {
         hideLoading();
@@ -228,17 +235,13 @@
       }
     });
 
-    // --- Render Leagues ---
     function renderLeagues(leagues) {
-      let lineup = [], bestball = [], survivor = [];
+      let lineup = [], bestball = [];
 
-      // Categorize
+      // Categorize into Bestball vs Lineup
       leagues.forEach(lg => {
-        const name = lg.name.toLowerCase();
         if (lg.settings && lg.settings.best_ball === 1) {
           bestball.push(lg);
-        } else if (name.includes('survivor') || name.includes('eliminator') || name.includes('pool')) {
-          survivor.push(lg);
         } else {
           lineup.push(lg);
         }
@@ -285,25 +288,37 @@
 
       container.innerHTML += buildSection('Lineup Leagues', lineup);
       container.innerHTML += buildSection('Bestball Leagues', bestball);
-      container.innerHTML += buildSection('Survivor Pools', survivor);
     }
 
-    // --- Render Players Tab ---
     function renderPlayers(sharesMap, totalLeagues) {
       const tbody = document.getElementById('playersTableBody');
       tbody.innerHTML = '';
 
-      // Convert map to array and sort by most shares
       const sortedPlayers = Object.entries(sharesMap)
         .map(([pid, shares]) => ({ pid, shares }))
         .sort((a, b) => b.shares - a.shares);
 
       sortedPlayers.forEach(p => {
-        const dbInfo = nflPlayersDb[p.pid] || {};
-        const name = dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name || "DEF/Unknown";
-        const pos = dbInfo.position || 'DEF';
-        const team = dbInfo.team || 'FA';
-        const health = dbInfo.injury_status || 'Active';
+        const dbInfo = nflPlayersDb[p.pid];
+        
+        let name = p.pid;
+        let pos = 'UNK';
+        let team = 'FA';
+        let health = 'Active';
+
+        // Format names & fix DEF mapping
+        if (dbInfo) {
+          if (dbInfo.position === 'DEF') {
+            name = (dbInfo.first_name + " " + dbInfo.last_name).trim() || dbInfo.team;
+            pos = 'DEF';
+          } else {
+            name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
+            pos = dbInfo.position || 'UNK';
+          }
+          team = dbInfo.team || 'FA';
+          health = dbInfo.injury_status || 'Active';
+        }
+
         const exposure = ((p.shares / totalLeagues) * 100).toFixed(1);
 
         let healthColor = 'status-active';
@@ -323,7 +338,6 @@
       });
     }
 
-    // --- Roster Modal Logic ---
     function openRoster(leagueId) {
       const league = allLeaguesData.find(l => l.league_id === leagueId);
       const roster = league.myRoster;
@@ -338,22 +352,28 @@
 
         let html = `<h6 class="fw-bold text-primary mb-2">Starters</h6><ul class="list-group list-group-flush mb-4">`;
         starters.forEach(pid => {
-           if (pid === "0") return; // Empty slot
-           const p = nflPlayersDb[pid] || {};
-           const name = p.full_name || p.first_name + " " + p.last_name || "DEF";
+           if (pid === "0") return; // Empty slot for Sleeper
+           const dbInfo = nflPlayersDb[pid];
+           const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
+           const pos = dbInfo ? dbInfo.position : '';
+           const team = dbInfo ? dbInfo.team : '';
+
            html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
-              <div><strong>${name}</strong> <span class="small text-muted">${p.team || ''}</span></div>
-              <span class="badge bg-primary">${p.position || ''}</span>
+              <div><strong>${name}</strong> <span class="small text-muted">${team || ''}</span></div>
+              <span class="badge bg-primary">${pos || ''}</span>
            </li>`;
         });
         
         html += `</ul><h6 class="fw-bold text-secondary mb-2">Bench</h6><ul class="list-group list-group-flush">`;
         bench.forEach(pid => {
-           const p = nflPlayersDb[pid] || {};
-           const name = p.full_name || p.first_name + " " + p.last_name || "DEF";
+           const dbInfo = nflPlayersDb[pid];
+           const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
+           const pos = dbInfo ? dbInfo.position : '';
+           const team = dbInfo ? dbInfo.team : '';
+
            html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
-              <div>${name} <span class="small text-muted">${p.team || ''}</span></div>
-              <span class="badge bg-secondary">${p.position || ''}</span>
+              <div>${name} <span class="small text-muted">${team || ''}</span></div>
+              <span class="badge bg-secondary">${pos || ''}</span>
            </li>`;
         });
         html += `</ul>`;
