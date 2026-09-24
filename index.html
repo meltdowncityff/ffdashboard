@@ -141,7 +141,7 @@
         <div class="row text-center mb-4">
           <div class="col-12">
             <h5 class="fw-bold text-white mb-1">Dynasty Trade Analyzer</h5>
-            <p class="text-muted small">Values powered by FantasyCalc (Superflex/PPR)</p>
+            <p class="text-muted small">Values powered by FantasyCalc (Superflex / 12-Team / 1 PPR / TEP+)</p>
           </div>
         </div>
         
@@ -151,7 +151,7 @@
           <!-- Team A -->
           <div class="col-md-6">
             <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideA" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick (e.g. 2026 1st)...">
+              <input type="text" id="inputSideA" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick (e.g. 2027 1st)...">
               <button class="btn btn-outline-primary" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side" id="listSideA"></div>
@@ -164,7 +164,7 @@
           <!-- Team B -->
           <div class="col-md-6">
             <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideB" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick (e.g. 2026 1st)...">
+              <input type="text" id="inputSideB" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick (e.g. 2027 1st)...">
               <button class="btn btn-outline-primary" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side" id="listSideB"></div>
@@ -262,11 +262,10 @@
       const savedUser = localStorage.getItem('sleeper_username');
       if (savedUser) document.getElementById('usernameInput').value = savedUser;
 
-      // Initialize draft picks immediately so they are always available
-      initDraftPicKS();
+      initDraftPicks();
     });
 
-    function initDraftPicKS() {
+    function initDraftPicks() {
       const currentYear = new Date().getFullYear();
       const pickYears = [currentYear, currentYear + 1, currentYear + 2];
       const rounds = [1, 2, 3, 4];
@@ -335,9 +334,9 @@
         }
       });
 
-      // 1. FantasyCalc
+      // 1. FantasyCalc (Configured for Superflex, 12-Team, 1 PPR, TEP+)
       try {
-        const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1');
+        const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te+');
         const fcData = await fcRes.json();
         fcData.forEach(item => {
           const p = item.player || item;
@@ -449,7 +448,6 @@
           try {
             const dbRes = await fetch('https://api.sleeper.app/v1/players/nfl');
             const playersData = await dbRes.json();
-            // Merge into nflPlayersDb while keeping pre-initialized picks
             Object.assign(nflPlayersDb, playersData);
             isDbLoaded = true;
           } catch (dbErr) {
@@ -457,7 +455,7 @@
             alert("Could not load player names.");
           }
           
-          showLoading('Fetching Market Values (FantasyCalc, StatsGuy, DynastyDealer)...');
+          showLoading('Fetching Market Values (FantasyCalc TEP+, StatsGuy, DynastyDealer)...');
           await fetchMarketData();
           buildSearchDatalist();
         }
@@ -640,11 +638,9 @@
       const val = input.value.trim();
       if (!val) return;
 
-      // Try to extract bracket ID first
       let match = val.match(/\[(.*?)\]/);
       let pid = match ? match[1] : null;
 
-      // Fallback: search by typed name or pick string if bracket wasn't selected
       if (!pid) {
         const lowerVal = val.toLowerCase();
         for (const id in nflPlayersDb) {
