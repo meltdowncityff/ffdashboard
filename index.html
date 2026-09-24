@@ -50,6 +50,14 @@
     .custom-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+    
+    .stat-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -124,10 +132,24 @@
     </div>
   </div>
 
+  <!-- Player Shares Modal -->
+  <div class="modal fade" id="sharesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-white" style="background: #1a1d2d; border: 1px solid #3b4261;">
+        <div class="modal-header border-bottom border-secondary">
+          <h5 class="modal-title fw-bold" id="sharesModalTitle">Leagues Owned</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0" id="sharesModalBody"></div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let nflPlayersDb = {}; 
     let allLeaguesData = [];
+    let globalPlayerShares = {}; // Track shares globally for modal access
     let isDbLoaded = false;
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -159,6 +181,17 @@
       document.getElementById('loadingIndicator').classList.add('d-none');
     }
 
+    // Helper Functions for calculating scores safely
+    function calcPF(settings) {
+      if (!settings) return 0;
+      return (settings.fpts || 0) + ((settings.fpts_decimal || 0) / 100);
+    }
+    
+    function calcMaxPF(settings) {
+      if (!settings) return 0;
+      return (settings.ppts || settings.fpts || 0) + ((settings.ppts_decimal || settings.fpts_decimal || 0) / 100);
+    }
+
     document.getElementById('fetchBtn').addEventListener('click', async () => {
       const username = document.getElementById('usernameInput').value.trim();
       const season = document.getElementById('seasonSelect').value;
@@ -172,7 +205,6 @@
         const userData = await userRes.json();
         if (!userData || !userData.user_id) throw new Error('User not found.');
 
-        // Load DB *before* processing shares so names populate properly.
         if (!isDbLoaded) {
           showLoading('Downloading NFL Player Database (this takes ~5 seconds once per session)...');
           try {
@@ -196,27 +228,36 @@
         }
 
         allLeaguesData = [];
-        let playerShares = {};
+        globalPlayerShares = {};
 
-        // Loop through all leagues with try/catch to prevent a single bad league from breaking the script
         for (const lg of leagues) {
           try {
             const rRes = await fetch(`https://api.sleeper.app/v1/league/${lg.league_id}/rosters`);
-            if (!rRes.ok) continue; // Skip broken leagues silently
+            if (!rRes.ok) continue; 
             
             const rosters = await rRes.json();
             
-            // Check for standard owner or co-owner
-            const myRoster = rosters.find(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id)));
+            // Calculate standings to get team rank
+            const sortedRosters = rosters.sort((a, b) => {
+              const aPct = ((a.settings?.wins || 0) + ((a.settings?.ties || 0) * 0.5)) / ((a.settings?.wins || 0) + (a.settings?.losses || 0) + (a.settings?.ties || 0) || 1);
+              const bPct = ((b.settings?.wins || 0) + ((b.settings?.ties || 0) * 0.5)) / ((b.settings?.wins || 0) + (b.settings?.losses || 0) + (b.settings?.ties || 0) || 1);
+              if (aPct !== bPct) return bPct - aPct;
+              return calcPF(b.settings) - calcPF(a.settings);
+            });
+
+            const myRank = sortedRosters.findIndex(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id))) + 1;
+            const myRoster = sortedRosters.find(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id)));
             
             if (myRoster) {
+              myRoster.rank = myRank;
               lg.myRoster = myRoster;
               allLeaguesData.push(lg);
 
               if (myRoster.players) {
                 myRoster.players.forEach(pid => {
-                  if (!playerShares[pid]) playerShares[pid] = 0;
-                  playerShares[pid]++;
+                  if (!globalPlayerShares[pid]) globalPlayerShares[pid] = { count: 0, leagues: [] };
+                  globalPlayerShares[pid].count++;
+                  globalPlayerShares[pid].leagues.push({ id: lg.league_id, name: lg.name });
                 });
               }
             }
@@ -227,7 +268,7 @@
 
         hideLoading();
         renderLeagues(allLeaguesData);
-        renderPlayers(playerShares, allLeaguesData.length);
+        renderPlayers(globalPlayerShares, allLeaguesData.length);
 
       } catch (err) {
         hideLoading();
@@ -238,13 +279,9 @@
     function renderLeagues(leagues) {
       let lineup = [], bestball = [];
 
-      // Categorize into Bestball vs Lineup
       leagues.forEach(lg => {
-        if (lg.settings && lg.settings.best_ball === 1) {
-          bestball.push(lg);
-        } else {
-          lineup.push(lg);
-        }
+        if (lg.settings && lg.settings.best_ball === 1) bestball.push(lg);
+        else lineup.push(lg);
       });
 
       const container = document.getElementById('leaguesContainer');
@@ -255,14 +292,18 @@
         let html = `<div class="section-header">${title} (${arr.length})</div>`;
         html += `<div class="glass-card"><table class="table table-dark table-hover align-middle mb-0">
           <thead><tr class="text-secondary small">
-            <th>League</th><th>Record</th><th>Points</th><th>KTC Tool</th>
+            <th>League</th><th>Record</th><th>PF</th><th>Max PF</th><th>Power Rankings</th>
           </tr></thead><tbody>`;
         
         arr.forEach(lg => {
           const r = lg.myRoster;
-          const wins = r ? r.settings.wins || 0 : 0;
-          const losses = r ? r.settings.losses || 0 : 0;
-          const pf = r ? parseFloat((r.settings.fpts || 0) + '.' + (r.settings.fpts_decimal || 0)).toFixed(1) : '0.0';
+          const wins = r?.settings?.wins || 0;
+          const losses = r?.settings?.losses || 0;
+          const ties = r?.settings?.ties || 0;
+          const record = `${wins}-${losses}${ties > 0 ? '-' + ties : ''}`;
+          
+          const pf = calcPF(r?.settings).toFixed(1);
+          const maxPf = calcMaxPF(r?.settings).toFixed(1);
           const avatar = lg.avatar ? `https://sleepercdn.com/avatars/thumbs/${lg.avatar}` : 'https://sleepercdn.com/images/v2/default_avatar-512x512.png';
 
           html += `
@@ -273,11 +314,12 @@
                   <span class="league-link" onclick="openRoster('${lg.league_id}')">${lg.name}</span>
                 </div>
               </td>
-              <td><span class="badge bg-success bg-opacity-25 text-success border border-success">${wins} - ${losses}</span></td>
+              <td><span class="badge bg-success bg-opacity-25 text-success border border-success">${record}</span></td>
               <td class="fw-bold">${pf}</td>
+              <td class="text-muted">${maxPf}</td>
               <td>
-                <a href="https://keeptradecut.com/dynasty-rankings?leagueId=${lg.league_id}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill" style="font-size: 0.75rem;">
-                  <i class="bi bi-box-arrow-up-right"></i> KTC Rank
+                <a href="https://keeptradecut.com/dynasty-power-rankings?leagueId=${lg.league_id}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill" style="font-size: 0.75rem;">
+                  <i class="bi bi-box-arrow-up-right"></i> KTC Power Rank
                 </a>
               </td>
             </tr>`;
@@ -295,18 +337,13 @@
       tbody.innerHTML = '';
 
       const sortedPlayers = Object.entries(sharesMap)
-        .map(([pid, shares]) => ({ pid, shares }))
-        .sort((a, b) => b.shares - a.shares);
+        .map(([pid, data]) => ({ pid, data }))
+        .sort((a, b) => b.data.count - a.data.count);
 
       sortedPlayers.forEach(p => {
         const dbInfo = nflPlayersDb[p.pid];
-        
-        let name = p.pid;
-        let pos = 'UNK';
-        let team = 'FA';
-        let health = 'Active';
+        let name = p.pid, pos = 'UNK', team = 'FA', health = 'Active';
 
-        // Format names & fix DEF mapping
         if (dbInfo) {
           if (dbInfo.position === 'DEF') {
             name = (dbInfo.first_name + " " + dbInfo.last_name).trim() || dbInfo.team;
@@ -319,7 +356,7 @@
           health = dbInfo.injury_status || 'Active';
         }
 
-        const exposure = ((p.shares / totalLeagues) * 100).toFixed(1);
+        const exposure = ((p.data.count / totalLeagues) * 100).toFixed(1);
 
         let healthColor = 'status-active';
         if (health === 'Questionable' || health === 'Doubtful') healthColor = 'status-ques';
@@ -330,7 +367,11 @@
             <td class="fw-bold">${name}</td>
             <td><span class="badge bg-secondary">${pos}</span></td>
             <td>${team}</td>
-            <td class="fw-bold text-info fs-6">${p.shares}</td>
+            <td>
+              <a href="javascript:void(0)" class="fw-bold text-info fs-5 text-decoration-none" onclick="openSharesModal('${p.pid}')">
+                ${p.data.count}
+              </a>
+            </td>
             <td>${exposure}%</td>
             <td class="fw-semibold ${healthColor}">${health}</td>
           </tr>
@@ -338,19 +379,67 @@
       });
     }
 
+    function openSharesModal(pid) {
+      const dbInfo = nflPlayersDb[pid];
+      const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
+      
+      document.getElementById('sharesModalTitle').innerText = `${name} Shares`;
+      
+      const leagues = globalPlayerShares[pid]?.leagues || [];
+      let html = `<div class="list-group list-group-flush">`;
+      
+      leagues.forEach(lg => {
+        html += `
+          <button class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center py-3" onclick="jumpToRoster('${lg.id}')">
+            <span class="fw-semibold league-link">${lg.name}</span>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </button>
+        `;
+      });
+      html += `</div>`;
+      
+      document.getElementById('sharesModalBody').innerHTML = html;
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('sharesModal')).show();
+    }
+
+    function jumpToRoster(leagueId) {
+      // Hide the shares modal, then open the roster modal
+      const sModal = bootstrap.Modal.getInstance(document.getElementById('sharesModal'));
+      if (sModal) sModal.hide();
+      openRoster(leagueId);
+    }
+
     function openRoster(leagueId) {
       const league = allLeaguesData.find(l => l.league_id === leagueId);
       const roster = league.myRoster;
-      document.getElementById('rosterModalTitle').innerText = league.name + " Roster";
+      document.getElementById('rosterModalTitle').innerText = league.name;
       
       const body = document.getElementById('rosterModalBody');
       if (!roster || !roster.players) {
         body.innerHTML = '<p class="text-muted">No roster found.</p>';
       } else {
+        const wins = roster.settings?.wins || 0;
+        const losses = roster.settings?.losses || 0;
+        const ties = roster.settings?.ties || 0;
+        const record = `${wins}-${losses}${ties > 0 ? '-' + ties : ''}`;
+        const pf = calcPF(roster.settings).toFixed(1);
+        const maxPf = calcMaxPF(roster.settings).toFixed(1);
+        const rank = roster.rank ? `#${roster.rank}` : '-';
+
+        // Stats Banner
+        let html = `
+          <div class="row g-2 mb-4">
+            <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">Rank</div><div class="fw-bold fs-5 text-warning">${rank}</div></div></div>
+            <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">Record</div><div class="fw-bold fs-5 text-success">${record}</div></div></div>
+            <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">PF</div><div class="fw-bold fs-5">${pf}</div></div></div>
+            <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">Max PF</div><div class="fw-bold fs-5 text-info">${maxPf}</div></div></div>
+          </div>
+        `;
+
         const starters = roster.starters || [];
         const bench = roster.players.filter(p => !starters.includes(p));
 
-        let html = `<h6 class="fw-bold text-primary mb-2">Starters</h6><ul class="list-group list-group-flush mb-4">`;
+        html += `<h6 class="fw-bold text-primary mb-2">Starters</h6><ul class="list-group list-group-flush mb-4 border-top border-secondary">`;
         starters.forEach(pid => {
            if (pid === "0") return; // Empty slot for Sleeper
            const dbInfo = nflPlayersDb[pid];
@@ -358,29 +447,29 @@
            const pos = dbInfo ? dbInfo.position : '';
            const team = dbInfo ? dbInfo.team : '';
 
-           html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
+           html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between py-2 px-1">
               <div><strong>${name}</strong> <span class="small text-muted">${team || ''}</span></div>
-              <span class="badge bg-primary">${pos || ''}</span>
+              <span class="badge bg-primary bg-opacity-75">${pos || ''}</span>
            </li>`;
         });
         
-        html += `</ul><h6 class="fw-bold text-secondary mb-2">Bench</h6><ul class="list-group list-group-flush">`;
+        html += `</ul><h6 class="fw-bold text-secondary mb-2">Bench</h6><ul class="list-group list-group-flush border-top border-secondary">`;
         bench.forEach(pid => {
            const dbInfo = nflPlayersDb[pid];
            const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
            const pos = dbInfo ? dbInfo.position : '';
            const team = dbInfo ? dbInfo.team : '';
 
-           html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
+           html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between py-2 px-1">
               <div>${name} <span class="small text-muted">${team || ''}</span></div>
-              <span class="badge bg-secondary">${pos || ''}</span>
+              <span class="badge bg-secondary bg-opacity-50">${pos || ''}</span>
            </li>`;
         });
         html += `</ul>`;
         body.innerHTML = html;
       }
 
-      new bootstrap.Modal(document.getElementById('rosterModal')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('rosterModal')).show();
     }
   </script>
 </body>
