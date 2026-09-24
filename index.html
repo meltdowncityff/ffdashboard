@@ -145,14 +145,13 @@
           </div>
         </div>
         
-        <!-- Datalist for Player Search -->
         <datalist id="playerSearchList"></datalist>
 
         <div class="row g-4">
           <!-- Team A -->
           <div class="col-md-6">
             <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideA" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick...">
+              <input type="text" id="inputSideA" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick (e.g. 2026 1st)...">
               <button class="btn btn-outline-primary" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side" id="listSideA"></div>
@@ -165,7 +164,7 @@
           <!-- Team B -->
           <div class="col-md-6">
             <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideB" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick...">
+              <input type="text" id="inputSideB" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick (e.g. 2026 1st)...">
               <button class="btn btn-outline-primary" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side" id="listSideB"></div>
@@ -248,11 +247,8 @@
     let allLeaguesData = [];
     let globalPlayerShares = {}; 
     let isDbLoaded = false;
-    
-    // Market Values Storage
     let marketValues = {}; 
     
-    // Trade Analyzer State
     let tradeSideA = [];
     let tradeSideB = [];
 
@@ -265,7 +261,43 @@
 
       const savedUser = localStorage.getItem('sleeper_username');
       if (savedUser) document.getElementById('usernameInput').value = savedUser;
+
+      // Initialize draft picks immediately so they are always available
+      initDraftPicKS();
     });
+
+    function initDraftPicKS() {
+      const currentYear = new Date().getFullYear();
+      const pickYears = [currentYear, currentYear + 1, currentYear + 2];
+      const rounds = [1, 2, 3, 4];
+
+      pickYears.forEach(year => {
+        rounds.forEach(round => {
+          const ordinal = round === 1 ? '1st' : round === 2 ? '2nd' : round === 3 ? '3rd' : '4th';
+          const pickName = `${year} ${ordinal} round pick`;
+          const syntheticId = `pick_${year}_${round}`;
+          const pickVal = getDefaultPickValue(round, year);
+
+          nflPlayersDb[syntheticId] = {
+            full_name: pickName,
+            position: 'PICK',
+            team: 'PICK'
+          };
+
+          marketValues[syntheticId] = { fc: pickVal, sg: pickVal, dd: pickVal, avg: pickVal, validSources: 1 };
+        });
+      });
+    }
+
+    function getDefaultPickValue(round, year) {
+      const baseValues = { 1: 5500, 2: 2800, 3: 1300, 4: 600 };
+      let val = baseValues[round] || 1000;
+      const yearDiff = year - new Date().getFullYear();
+      if (yearDiff > 0) {
+        val *= Math.pow(0.85, yearDiff);
+      }
+      return Math.round(val);
+    }
 
     function switchTab(tabId, btnElement) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -298,7 +330,9 @@
     // --- MARKET DATA FETCHING ---
     async function fetchMarketData() {
       Object.keys(nflPlayersDb).forEach(id => {
-        marketValues[id] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+        if (!marketValues[id]) {
+          marketValues[id] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+        }
       });
 
       // 1. FantasyCalc
@@ -306,12 +340,24 @@
         const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1');
         const fcData = await fcRes.json();
         fcData.forEach(item => {
-          const sId = item.player?.sleeperId || item.sleeperId;
+          const p = item.player || item;
+          const sId = p.sleeperId || item.sleeperId;
           const val = item.value || 0;
-          if (sId && marketValues[sId]) {
-            marketValues[sId].fc = val;
-            marketValues[sId].avg += val;
-            marketValues[sId].validSources++;
+          const name = (p.name || p.fullName || "").toLowerCase();
+
+          let targetId = sId;
+          if (p.position === 'PICK' || name.includes('round pick') || name.includes('rd pick')) {
+            for (const id in nflPlayersDb) {
+              if (nflPlayersDb[id].position === 'PICK' && nflPlayersDb[id].full_name.toLowerCase() === name) {
+                targetId = id;
+                break;
+              }
+            }
+          }
+
+          if (targetId && marketValues[targetId]) {
+            marketValues[targetId].fc = val;
+            marketValues[targetId].validSources = Math.max(1, marketValues[targetId].validSources);
           }
         });
       } catch (e) { console.warn("FantasyCalc fetch error:", e); }
@@ -326,8 +372,7 @@
           const val = item.value || 0;
           if (sId && marketValues[sId]) {
             marketValues[sId].sg = val;
-            marketValues[sId].avg += val;
-            marketValues[sId].validSources++;
+            marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
           }
         });
       } catch (e) { console.warn("Stats Guy fetch error:", e); }
@@ -342,16 +387,19 @@
           const val = item.value || 0;
           if (sId && marketValues[sId]) {
             marketValues[sId].dd = val;
-            marketValues[sId].avg += val;
-            marketValues[sId].validSources++;
+            marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
           }
         });
       } catch (e) { console.warn("Dynasty Dealer fetch error:", e); }
 
       // Finalize Averages
       Object.keys(marketValues).forEach(id => {
-        if (marketValues[id].validSources > 0) {
-          marketValues[id].avg = Math.round(marketValues[id].avg / marketValues[id].validSources);
+        const m = marketValues[id];
+        const vals = [m.fc, m.sg, m.dd].filter(v => v > 0);
+        if (vals.length > 0) {
+          m.avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+        } else if (m.fc > 0) {
+          m.avg = m.fc;
         }
       });
     }
@@ -361,61 +409,26 @@
       if (!datalist) return;
       datalist.innerHTML = '';
 
-      // 1. Add regular players from database
-      if (window.nflPlayersDb && typeof window.nflPlayersDb === 'object') {
-        Object.keys(window.nflPlayersDb).forEach(id => {
-          const p = window.nflPlayersDb[id];
-          const name = p.position === 'DEF' ? (p.first_name + " " + p.last_name).trim() : p.full_name || (p.first_name + " " + p.last_name).trim();
-          const pos = p.position;
-          const team = p.team || '';
-          
-          if (['QB', 'RB', 'WR', 'TE', 'K', 'DEF', 'PICK'].includes(pos)) {
-            const option = document.createElement('option');
-            option.value = `${name} - ${pos} - ${team || 'FA'} [${id}]`;
-            datalist.appendChild(option);
-          }
-        });
-      }
+      Object.keys(nflPlayersDb).forEach(id => {
+        const p = nflPlayersDb[id];
+        let name = '';
+        let pos = p.position || 'UNK';
+        let team = p.team || 'FA';
 
-      // 2. Ensure standard Dynasty draft picks are available as selectable options
-      const currentYear = new Date().getFullYear();
-      const pickYears = [currentYear, currentYear + 1, currentYear + 2];
-      const rounds = [1, 2, 3, 4];
+        if (pos === 'PICK') {
+          name = p.full_name;
+        } else if (pos === 'DEF') {
+          name = (p.first_name + " " + p.last_name).trim();
+        } else {
+          name = p.full_name || (p.first_name + " " + p.last_name).trim();
+        }
 
-      pickYears.forEach(year => {
-        rounds.forEach(round => {
-          const ordinal = round === 1 ? '1st' : round === 2 ? '2nd' : round === 3 ? '3rd' : '4th';
-          const pickName = `${year} ${ordinal} round pick`;
-          const syntheticId = `pick_${year}_${round}`;
-          
-          const pickVal = getDefaultPickValue(round, year);
-          if (!nflPlayersDb[syntheticId]) {
-            nflPlayersDb[syntheticId] = {
-              full_name: pickName,
-              position: 'PICK',
-              team: 'PICK'
-            };
-            if (typeof marketValues !== 'undefined') {
-              marketValues[syntheticId] = { fc: pickVal, sg: pickVal, dd: pickVal, avg: pickVal, validSources: 1 };
-            }
-          }
-
+        if (['QB', 'RB', 'WR', 'TE', 'K', 'DEF', 'PICK'].includes(pos)) {
           const option = document.createElement('option');
-          option.value = `${pickName} - PICK - [${syntheticId}]`;
+          option.value = `${name} - ${pos} - ${team} [${id}]`;
           datalist.appendChild(option);
-        });
+        }
       });
-    }
-
-    function getDefaultPickValue(round, year) {
-      const baseValues = { 1: 5500, 2: 2800, 3: 1300, 4: 600 };
-      let val = baseValues[round] || 1000;
-      
-      const yearDiff = year - new Date().getFullYear();
-      if (yearDiff > 0) {
-        val *= Math.pow(0.85, yearDiff);
-      }
-      return Math.round(val);
     }
 
     document.getElementById('fetchBtn').addEventListener('click', async () => {
@@ -435,7 +448,9 @@
           showLoading('Downloading NFL Player Database...');
           try {
             const dbRes = await fetch('https://api.sleeper.app/v1/players/nfl');
-            nflPlayersDb = await dbRes.json();
+            const playersData = await dbRes.json();
+            // Merge into nflPlayersDb while keeping pre-initialized picks
+            Object.assign(nflPlayersDb, playersData);
             isDbLoaded = true;
           } catch (dbErr) {
             console.error("Failed to fetch player database.", dbErr);
@@ -622,11 +637,27 @@
     // --- TAB 3: TRADE ANALYZER ---
     function addPlayerToTrade(side) {
       const input = document.getElementById(side === 'A' ? 'inputSideA' : 'inputSideB');
-      const val = input.value;
-      const match = val.match(/\[(.*?)\]/);
-      
-      if (!match) return alert("Please select a valid player or pick from the dropdown.");
-      const pid = match[1];
+      const val = input.value.trim();
+      if (!val) return;
+
+      // Try to extract bracket ID first
+      let match = val.match(/\[(.*?)\]/);
+      let pid = match ? match[1] : null;
+
+      // Fallback: search by typed name or pick string if bracket wasn't selected
+      if (!pid) {
+        const lowerVal = val.toLowerCase();
+        for (const id in nflPlayersDb) {
+          const p = nflPlayersDb[id];
+          const name = (p.position === 'PICK' ? p.full_name : (p.full_name || (p.first_name + " " + p.last_name))).toLowerCase();
+          if (name === lowerVal || name.includes(lowerVal) || lowerVal.includes(name)) {
+            pid = id;
+            break;
+          }
+        }
+      }
+
+      if (!pid) return alert("Please select a valid player or pick from the dropdown.");
 
       if (side === 'A' && !tradeSideA.includes(pid)) tradeSideA.push(pid);
       if (side === 'B' && !tradeSideB.includes(pid)) tradeSideB.push(pid);
@@ -664,7 +695,7 @@
             }
           }
 
-          const val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
+          const val = (marketValues[pid] && marketValues[pid].avg) ? marketValues[pid].avg : 0;
           
           if (side === 'A') totalA += val;
           if (side === 'B') totalB += val;
@@ -673,7 +704,7 @@
             <div class="player-pill">
               <div><span class="fw-bold">${name}</span> <span class="badge bg-secondary ms-1">${pos}</span></div>
               <div class="d-flex align-items-center gap-3">
-                <span class="text-info fw-semibold">${val}</span>
+                <span class="text-info fw-semibold">${val.toLocaleString()}</span>
                 <i class="bi bi-x-circle-fill remove-btn" onclick="removePlayerFromTrade('${side}', '${pid}')"></i>
               </div>
             </div>`;
