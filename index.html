@@ -269,35 +269,25 @@
       const currentYear = new Date().getFullYear();
       const pickYears = [currentYear, currentYear + 1, currentYear + 2, currentYear + 3];
       const rounds = [
-        { round: 1, name: '1st', base: 5500 },
-        { round: 2, name: '2nd', base: 2800 },
-        { round: 3, name: '3rd', base: 1300 },
-        { round: 4, name: '4th', base: 600 }
+        { round: 1, name: '1st' },
+        { round: 2, name: '2nd' },
+        { round: 3, name: '3rd' },
+        { round: 4, name: '4th' }
       ];
 
       rounds.forEach(r => {
         pickYears.forEach(year => {
-          const variants = [
-            { suffix: '', mult: 1.0 },
-            { suffix: ' (Early)', mult: 1.5 },
-            { suffix: ' (Mid)', mult: 1.1 },
-            { suffix: ' (Late)', mult: 0.8 }
-          ];
-
-          variants.forEach(v => {
-            const pickName = `${year} ${r.name}${v.suffix}`;
-            const pickId = `pick_${year}_${r.round}_${v.suffix.toLowerCase().replace(/[^a-z]/g, 'gen')}`;
-            let val = r.base * v.mult;
-            const yearDiff = year - new Date().getFullYear();
-            if (yearDiff > 0) val *= Math.pow(0.85, yearDiff);
-            val = Math.round(val);
+          const variants = ['', ' (Early)', ' (Mid)', ' (Late)'];
+          variants.forEach(suffix => {
+            const pickName = `${year} ${r.name}${suffix}`;
+            const pickId = `pick_${year}_${r.round}_${suffix.toLowerCase().replace(/[^a-z]/g, 'gen')}`;
 
             nflPlayersDb[pickId] = {
               full_name: pickName,
               position: 'PICK',
               team: 'PICK'
             };
-            marketValues[pickId] = { fc: val, sg: val, dd: val, avg: val, validSources: 1 };
+            marketValues[pickId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
           });
         });
       });
@@ -333,14 +323,8 @@
     }
 
     // --- MARKET DATA FETCHING ---
-    async function fetchMarketData() {
-      Object.keys(nflPlayersDb).forEach(id => {
-        if (!marketValues[id]) {
-          marketValues[id] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
-        }
-      });
-
-      // 1. FantasyCalc (Superflex, 12-Team, 1 PPR, TEP+) - Maps each pick variation uniquely
+    async function fetchMarketValueApi() {
+      // 1. FantasyCalc (Superflex, 12-Team, 1 PPR, TEP+) - Pulls exact independent values for every pick variation
       try {
         const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te+');
         const fcData = await fcRes.json();
@@ -351,9 +335,8 @@
           const name = (p.name || p.fullName || "").trim();
           const pos = (p.position || "").toUpperCase();
 
-          if (pos === 'PICK' || name.toLowerCase().includes('pick') || name.toLowerCase().includes('1st') || name.toLowerCase().includes('2nd') || name.toLowerCase().includes('3rd') || name.toLowerCase().includes('4th')) {
-            // Create a distinct unique ID per pick variant (Early, Mid, Late, Generic)
-            const pickId = `fc_pick_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+          if (pos === 'PICK' || name.toLowerCase().includes('1st') || name.toLowerCase().includes('2nd') || name.toLowerCase().includes('3rd') || name.toLowerCase().includes('4th') || name.toLowerCase().includes('pick')) {
+            const pickId = `pick_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
             
             nflPlayersDb[pickId] = {
               full_name: name,
@@ -464,7 +447,7 @@
           }
           
           showLoading('Fetching Market Values (FantasyCalc TEP+, StatsGuy, DynastyDealer)...');
-          await fetchMarketData();
+          await fetchMarketValueApi();
           buildSearchDatalist();
         }
 
