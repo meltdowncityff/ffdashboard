@@ -4,97 +4,208 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FFAddict Dashboard</title>
+  
+  <!-- Bootstrap & Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     body {
-      background-color: #0f111a;
+      /* American Football Gridiron Background with a Dark Overlay for readability */
+      background: linear-gradient(to bottom, rgba(15, 17, 26, 0.85), rgba(15, 17, 26, 0.98)), 
+                  url('https://images.unsplash.com/photo-1508344928928-7137b29de216?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+      background-size: cover;
       font-family: 'Inter', sans-serif;
       color: #e2e8f0;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      margin: 0;
     }
+
+    /* Elegant Hero Header */
+    .hero-header {
+      padding: 2.5rem 1rem;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      margin-bottom: 2rem;
+    }
+
+    .hero-title {
+      font-weight: 800;
+      font-size: 2.5rem;
+      color: #fff;
+      letter-spacing: -1px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    /* Glassmorphism Cards */
     .glass-card {
-      background: #1a1d2d;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
+      background: rgba(26, 29, 45, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      overflow: hidden;
     }
+
+    /* Mobile Responsive Tables */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .table {
+      margin-bottom: 0;
+      background: transparent !important;
+    }
+    .table-dark {
+      --bs-table-bg: transparent;
+      --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+      --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+    }
+
     .league-link {
       color: #38bdf8;
       cursor: pointer;
       font-weight: 600;
       text-decoration: none;
+      transition: color 0.2s;
     }
-    .league-link:hover { text-decoration: underline; color: #7dd3fc; }
+    .league-link:hover { color: #7dd3fc; }
+    
     .section-header {
-      border-bottom: 2px solid #3b4261;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
       padding-bottom: 8px;
       margin-top: 32px;
       margin-bottom: 16px;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #f8fafc;
     }
+
     .avatar-img {
-      width: 36px; height: 36px;
+      width: 40px; height: 40px;
       border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.1);
     }
+
     .status-active { color: #4ade80; }
     .status-ques { color: #facc15; }
     .status-out { color: #f87171; }
     
-    .custom-tab {
-      background: transparent; border: 1px solid #3b4261; color: #94a3b8;
-      padding: 8px 16px; border-radius: 8px; font-weight: 600; transition: all 0.2s;
+    /* Modern Tabs */
+    .custom-tabs-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      justify-content: center;
     }
-    .custom-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    
-    .stat-box {
+    .custom-tab {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 10px;
+      color: #cbd5e1;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+    }
+    .custom-tab:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .custom-tab.active {
+      background: #6366f1;
+      color: white;
+      border-color: #6366f1;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    .tab-content { display: none; animation: fadeIn 0.4s ease; }
+    .tab-content.active { display: block; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stat-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
       text-align: center;
     }
     
-    .trade-side { min-height: 250px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 15px; }
-    .player-pill { background: #3b4261; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-    .remove-btn { cursor: pointer; color: #f87171; }
+    /* Trade Analyzer Styling */
+    .trade-side { 
+      min-height: 250px; 
+      background: rgba(0,0,0,0.3); 
+      border-radius: 12px; 
+      padding: 1rem; 
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .player-pill { 
+      background: rgba(255,255,255,0.08); 
+      padding: 10px 14px; 
+      border-radius: 8px; 
+      margin-bottom: 8px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .remove-btn { cursor: pointer; color: #f87171; transition: color 0.2s; font-size: 1.1rem; }
     .remove-btn:hover { color: #fca5a5; }
 
     footer {
       margin-top: auto;
-      border-top: 1px solid #3b4261;
-      background: #151722;
-      padding: 1.5rem 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      padding: 2rem 0;
     }
     .hover-white:hover { color: #fff !important; }
+
+    /* Custom Input Controls */
+    .glass-input {
+      background: rgba(0, 0, 0, 0.4) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      color: #fff !important;
+    }
+    .glass-input:focus {
+      background: rgba(0, 0, 0, 0.6) !important;
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25) !important;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-dark bg-dark border-bottom border-secondary mb-4 py-3">
+  <!-- Hero Header -->
+  <div class="hero-header">
     <div class="container-fluid px-4">
-      <span class="navbar-brand fw-bold text-white"><i class="bi bi-trophy-fill text-warning"></i> FFAddict</span>
-      <div class="d-flex gap-2">
-        <input type="text" id="usernameInput" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Sleeper Username" style="width: 150px;">
-        <select id="seasonSelect" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 90px;"></select>
-        <button id="fetchBtn" class="btn btn-primary btn-sm px-3 fw-bold">Load Data</button>
+      <h1 class="hero-title mb-3"><i class="bi bi-trophy-fill text-warning me-2"></i>FFAddict</h1>
+      <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center">
+        <input type="text" id="usernameInput" class="form-control glass-input" placeholder="Sleeper Username" style="max-width: 200px;">
+        <select id="seasonSelect" class="form-select glass-input" style="max-width: 100px;"></select>
+        <button id="fetchBtn" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm">Load Data</button>
       </div>
     </div>
-  </nav>
+  </div>
 
   <!-- Main Area -->
-  <div class="container-fluid px-4 mb-5">
+  <div class="container-fluid px-4 px-md-5 mb-5">
     
     <!-- Tab Controls -->
-    <div class="d-flex flex-wrap gap-2 mb-4">
+    <div class="custom-tabs-container">
       <button class="custom-tab active" onclick="switchTab('leaguesTab', this)">My Leagues</button>
       <button class="custom-tab" onclick="switchTab('playersTab', this)">My Players</button>
       <button class="custom-tab" onclick="switchTab('analyzerTab', this)">Trade Analyzer</button>
@@ -103,35 +214,40 @@
 
     <!-- Loading State -->
     <div id="loadingIndicator" class="text-center py-5 d-none">
-      <div class="spinner-border text-primary" role="status"></div>
-      <div id="loadingText" class="mt-3 text-muted">Fetching Data...</div>
+      <div class="spinner-border text-primary shadow-sm" role="status" style="width: 3rem; height: 3rem;"></div>
+      <div id="loadingText" class="mt-3 text-light fw-semibold fs-5">Fetching Data...</div>
     </div>
 
     <!-- TAB 1: Leagues -->
     <div id="leaguesTab" class="tab-content active">
       <div id="leaguesContainer">
-        <div class="text-center text-muted py-5 glass-card">Enter your username and click Load Data.</div>
+        <div class="glass-card text-center text-muted py-5">
+          <i class="bi bi-search fs-1 mb-3 d-block opacity-50"></i>
+          Enter your username and click Load Data.
+        </div>
       </div>
     </div>
 
     <!-- TAB 2: Players -->
     <div id="playersTab" class="tab-content">
       <div class="glass-card p-3">
-        <table class="table table-dark table-hover align-middle mb-0">
-          <thead>
-            <tr class="text-secondary small text-uppercase">
-              <th>Player</th>
-              <th>Pos</th>
-              <th>Team</th>
-              <th>Shares</th>
-              <th>Exposure</th>
-              <th>Health</th>
-            </tr>
-          </thead>
-          <tbody id="playersTableBody">
-            <tr><td colspan="6" class="text-center text-muted py-4">Load data to see player shares.</td></tr>
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="table table-dark table-hover align-middle mb-0">
+            <thead>
+              <tr class="text-secondary small text-uppercase">
+                <th>Player</th>
+                <th>Pos</th>
+                <th>Team</th>
+                <th>Shares</th>
+                <th>Exposure</th>
+                <th>Health</th>
+              </tr>
+            </thead>
+            <tbody id="playersTableBody">
+              <tr><td colspan="6" class="text-center text-muted py-5">Load data to see player shares.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -140,8 +256,8 @@
       <div class="glass-card p-4">
         <div class="row text-center mb-4">
           <div class="col-12">
-            <h5 class="fw-bold text-white mb-1">Dynasty Trade Analyzer</h5>
-            <p class="text-muted small">Values strictly powered by FantasyCalc (Superflex / 12-Team / 1 PPR / TEP+)</p>
+            <h4 class="fw-bold text-white mb-2">Dynasty Trade Analyzer</h4>
+            <p class="text-muted small">Values powered by FantasyCalc (Superflex / 12-Team / 1 PPR / TEP+)</p>
           </div>
         </div>
         
@@ -151,33 +267,33 @@
           <!-- Team A -->
           <div class="col-md-6">
             <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideA" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick (e.g. 2027 1st)...">
-              <button class="btn btn-outline-primary" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
+              <input type="text" id="inputSideA" class="form-control glass-input" list="playerSearchList" placeholder="Search player or pick (e.g. 2027 1st)...">
+              <button class="btn btn-primary" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
             </div>
-            <div class="trade-side" id="listSideA"></div>
-            <div class="mt-3 d-flex justify-content-between align-items-center">
-              <span class="fs-5 fw-bold text-secondary">Team A Total:</span>
-              <span class="fs-4 fw-bold text-white" id="totalSideA">0</span>
+            <div class="trade-side shadow-sm" id="listSideA"></div>
+            <div class="mt-3 d-flex justify-content-between align-items-center bg-black bg-opacity-25 p-3 rounded">
+              <span class="fs-5 fw-bold text-secondary">Team A Total</span>
+              <span class="fs-3 fw-bold text-white" id="totalSideA">0</span>
             </div>
           </div>
 
           <!-- Team B -->
           <div class="col-md-6">
             <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideB" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick (e.g. 2027 1st)...">
-              <button class="btn btn-outline-primary" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
+              <input type="text" id="inputSideB" class="form-control glass-input" list="playerSearchList" placeholder="Search player or pick (e.g. 2027 1st)...">
+              <button class="btn btn-primary" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
             </div>
-            <div class="trade-side" id="listSideB"></div>
-            <div class="mt-3 d-flex justify-content-between align-items-center">
-              <span class="fs-5 fw-bold text-secondary">Team B Total:</span>
-              <span class="fs-4 fw-bold text-white" id="totalSideB">0</span>
+            <div class="trade-side shadow-sm" id="listSideB"></div>
+            <div class="mt-3 d-flex justify-content-between align-items-center bg-black bg-opacity-25 p-3 rounded">
+              <span class="fs-5 fw-bold text-secondary">Team B Total</span>
+              <span class="fs-3 fw-bold text-white" id="totalSideB">0</span>
             </div>
           </div>
         </div>
 
-        <div class="text-center mt-5 pt-3 border-top border-secondary">
-          <h4 class="fw-bold mb-1" id="tradeVerdict">Add players to evaluate</h4>
-          <p class="text-muted" id="tradeDiff"></p>
+        <div class="text-center mt-5 pt-4 border-top border-secondary">
+          <h3 class="fw-bold mb-2" id="tradeVerdict">Add players to evaluate</h3>
+          <p class="text-muted fs-5" id="tradeDiff"></p>
         </div>
       </div>
     </div>
@@ -185,31 +301,33 @@
     <!-- TAB 4: League Value Board -->
     <div id="valueBoardTab" class="tab-content">
       <div class="glass-card p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h5 class="fw-bold text-white mb-1">League Value Board</h5>
+        <div class="row align-items-center mb-4 g-3">
+          <div class="col-md-8">
+            <h4 class="fw-bold text-white mb-2">League Value Board</h4>
             <p class="text-muted small mb-0">Total roster values aggregated from FantasyCalc, Stats Guy, & Dynasty Dealer.</p>
           </div>
-          <select id="boardLeagueSelect" class="form-select bg-dark text-white border-secondary w-auto" onchange="renderValueBoard()">
-            <option value="">Select a League...</option>
-          </select>
+          <div class="col-md-4 text-md-end">
+            <select id="boardLeagueSelect" class="form-select glass-input w-100" onchange="renderValueBoard()">
+              <option value="">Select a League...</option>
+            </select>
+          </div>
         </div>
 
-        <div id="valueBoardContent">
-          <div class="text-center text-muted py-4">Select a league above to load the board.</div>
+        <div id="valueBoardContent" class="table-responsive">
+          <div class="text-center text-muted py-5">Select a league above to load the board.</div>
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- Footer Credits -->
+  <!-- Footer -->
   <footer>
     <div class="container text-center">
-      <div class="small text-muted mb-2">Market values supplied by public APIs.</div>
-      <div class="d-flex justify-content-center gap-4">
+      <div class="small text-muted mb-3">Market values supplied by public APIs. For entertainment purposes.</div>
+      <div class="d-flex flex-wrap justify-content-center gap-4">
         <a href="https://fantasycalc.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-calculator"></i> FantasyCalc</a>
-        <a href="https://statsguyfantasy.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-bar-chart"></i> Stats Guy Fantasy</a>
+        <a href="https://statsguyfantasy.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-bar-chart"></i> Stats Guy</a>
         <a href="https://dynastydealer.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-tags"></i> Dynasty Dealer</a>
       </div>
     </div>
@@ -217,8 +335,8 @@
 
   <!-- Roster Modal -->
   <div class="modal fade" id="rosterModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-      <div class="modal-content text-white" style="background: #1a1d2d; border: 1px solid #3b4261;">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+      <div class="modal-content text-white" style="background: rgba(26, 29, 45, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
         <div class="modal-header border-bottom border-secondary">
           <h5 class="modal-title fw-bold" id="rosterModalTitle">Team Roster</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -231,7 +349,7 @@
   <!-- Player Shares Modal -->
   <div class="modal fade" id="sharesModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content text-white" style="background: #1a1d2d; border: 1px solid #3b4261;">
+      <div class="modal-content text-white" style="background: rgba(26, 29, 45, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
         <div class="modal-header border-bottom border-secondary">
           <h5 class="modal-title fw-bold" id="sharesModalTitle">Leagues Owned</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -280,7 +398,6 @@
           const variants = ['', ' (Early)', ' (Mid)', ' (Late)'];
           variants.forEach(suffix => {
             const pickName = `${year} ${r.name}${suffix}`;
-            // Corrected ID creation to exactly match what the API data maps to
             const pickId = `pick_${pickName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
 
             nflPlayersDb[pickId] = {
@@ -326,11 +443,8 @@
       return (settings.ppts || settings.fpts || 0) + ((settings.ppts_decimal || settings.fpts_decimal || 0) / 100);
     }
 
-    // --- MARKET DATA FETCHING ---
     async function fetchMarketValueApi() {
-      // 1. FantasyCalc (Superflex, 12-Team, 1 PPR, TEP+)
       try {
-        // MUST URL Encode the + sign as %2B otherwise it sends as a space and crashes the request
         const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te%2B');
         if (!fcRes.ok) throw new Error(`FantasyCalc responded with ${fcRes.status}`);
         const fcData = await fcRes.json();
@@ -345,33 +459,22 @@
           if (pos === 'PICK' || name.toLowerCase().includes('1st') || name.toLowerCase().includes('2nd') || name.toLowerCase().includes('3rd') || name.toLowerCase().includes('4th') || name.toLowerCase().includes('pick')) {
             const pickId = `pick_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
             
-            nflPlayersDb[pickId] = {
-              full_name: name,
-              position: 'PICK',
-              team: 'PICK'
-            };
+            nflPlayersDb[pickId] = { full_name: name, position: 'PICK', team: 'PICK' };
             
-            if (!marketValues[pickId]) {
-              marketValues[pickId] = { fc: val, sg: 0, dd: 0, avg: val, validSources: 1 };
-            } else {
-              marketValues[pickId].fc = val;
-              marketValues[pickId].avg = val;
-            }
+            if (!marketValues[pickId]) marketValues[pickId] = { fc: val, sg: 0, dd: 0, avg: val, validSources: 1 };
+            else { marketValues[pickId].fc = val; marketValues[pickId].avg = val; }
           } else {
             if (sId) {
               if (!marketValues[sId]) marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
               marketValues[sId].fc = val;
               marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
             }
-            
-            // Backup mapping by name in case a rookie's Sleeper ID is missing from the API early in the season
             const nameKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
             marketValues[`name_${nameKey}`] = val;
           }
         });
       } catch (e) { console.warn("FantasyCalc fetch error:", e); }
 
-      // 2. Stats Guy Fantasy
       try {
         const sgRes = await fetch('https://api.statsguyfantasy.com/api/v1/rankings');
         const sgData = await sgRes.json();
@@ -387,7 +490,6 @@
         });
       } catch (e) { console.warn("Stats Guy fetch error:", e); }
 
-      // 3. Dynasty Dealer
       try {
         const ddRes = await fetch('https://www.dynastydealer.com/api/player-values');
         const ddData = await ddRes.json();
@@ -403,21 +505,13 @@
         });
       } catch (e) { console.warn("Dynasty Dealer fetch error:", e); }
 
-      // Finalize Averages (for League Value Board multi-source aggregate)
       Object.keys(marketValues).forEach(id => {
-        if (id.startsWith('name_')) return; // skip name fallbacks
-        
+        if (id.startsWith('name_')) return; 
         const m = marketValues[id];
-        if (id.startsWith('pick_')) {
-          m.avg = m.fc;
-          return;
-        }
+        if (id.startsWith('pick_')) { m.avg = m.fc; return; }
         const vals = [m.fc, m.sg, m.dd].filter(v => v > 0);
-        if (vals.length > 0) {
-          m.avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
-        } else if (m.fc > 0) {
-          m.avg = m.fc;
-        }
+        if (vals.length > 0) m.avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+        else if (m.fc > 0) m.avg = m.fc;
       });
     }
 
@@ -466,10 +560,9 @@
             isDbLoaded = true;
           } catch (dbErr) {
             console.error("Failed to fetch player database.", dbErr);
-            alert("Could not load player names.");
           }
           
-          showLoading('Fetching Market Values (FantasyCalc TEP+, StatsGuy, DynastyDealer)...');
+          showLoading('Fetching Market Values...');
           await fetchMarketValueApi();
           buildSearchDatalist();
         }
@@ -480,7 +573,7 @@
         
         if (!leagues || leagues.length === 0) {
           hideLoading();
-          document.getElementById('leaguesContainer').innerHTML = `<div class="text-center text-muted py-5 glass-card">No leagues found.</div>`;
+          document.getElementById('leaguesContainer').innerHTML = `<div class="glass-card text-center text-muted py-5">No leagues found.</div>`;
           return;
         }
 
@@ -524,9 +617,7 @@
                 });
               }
             }
-          } catch (e) {
-            console.warn(`Could not process league ${lg.name}: `, e);
-          }
+          } catch (e) { console.warn(`Could not process league ${lg.name}: `, e); }
         }
 
         hideLoading();
@@ -535,14 +626,12 @@
 
       } catch (err) {
         hideLoading();
-        document.getElementById('leaguesContainer').innerHTML = `<div class="text-danger py-4">${err.message}</div>`;
+        document.getElementById('leaguesContainer').innerHTML = `<div class="glass-card text-danger py-5 text-center fw-bold">${err.message}</div>`;
       }
     });
 
-    // --- TAB 1 & 2 RENDERING ---
     function renderLeagues(leagues) {
       let lineup = [], bestball = [];
-
       leagues.forEach(lg => {
         if (lg.settings && lg.settings.best_ball === 1) bestball.push(lg);
         else lineup.push(lg);
@@ -554,8 +643,8 @@
       const buildSection = (title, arr) => {
         if (arr.length === 0) return '';
         let html = `<div class="section-header">${title} (${arr.length})</div>`;
-        html += `<div class="glass-card"><table class="table table-dark table-hover align-middle mb-0">
-          <thead><tr class="text-secondary small">
+        html += `<div class="glass-card"><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0">
+          <thead><tr class="text-secondary small text-uppercase">
             <th>League</th><th>Record</th><th>PF</th><th>Max PF</th><th>Power Rankings</th>
           </tr></thead><tbody>`;
         
@@ -573,8 +662,8 @@
           html += `
             <tr>
               <td>
-                <div class="d-flex align-items-center gap-3">
-                  <img src="${avatar}" class="avatar-img">
+                <div class="d-flex align-items-center gap-3" style="min-width: 200px;">
+                  <img src="${avatar}" class="avatar-img shadow-sm">
                   <span class="league-link" onclick="openRoster('${lg.league_id}')">${lg.name}</span>
                 </div>
               </td>
@@ -582,13 +671,13 @@
               <td class="fw-bold">${pf}</td>
               <td class="text-muted">${maxPf}</td>
               <td>
-                <a href="https://keeptradecut.com/dynasty-power-rankings?leagueId=${lg.league_id}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill" style="font-size: 0.75rem;">
-                  <i class="bi bi-box-arrow-up-right"></i> KTC Power Rank
+                <a href="https://keeptradecut.com/dynasty-power-rankings?leagueId=${lg.league_id}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill text-nowrap" style="font-size: 0.75rem;">
+                  <i class="bi bi-box-arrow-up-right"></i> KTC Rank
                 </a>
               </td>
             </tr>`;
         });
-        html += `</tbody></table></div>`;
+        html += `</tbody></table></div></div>`;
         return html;
       };
 
@@ -631,7 +720,7 @@
 
         tbody.innerHTML += `
           <tr>
-            <td class="fw-bold">${name}</td>
+            <td class="fw-bold text-nowrap">${name}</td>
             <td><span class="badge bg-secondary">${pos}</span></td>
             <td>${team}</td>
             <td>
@@ -646,7 +735,6 @@
       });
     }
 
-    // --- TAB 3: TRADE ANALYZER (Strictly FantasyCalc) ---
     function addPlayerToTrade(side) {
       const input = document.getElementById(side === 'A' ? 'inputSideA' : 'inputSideB');
       const val = input.value.trim();
@@ -690,25 +778,15 @@
         let html = '';
         arr.forEach(pid => {
           const dbInfo = nflPlayersDb[pid];
-          let name = pid;
-          let pos = '';
+          let name = pid, pos = '';
           if (dbInfo) {
-            if (dbInfo.position === 'PICK') {
-              name = dbInfo.full_name;
-              pos = 'PICK';
-            } else if (dbInfo.position === 'DEF') {
-              name = (dbInfo.first_name + " " + dbInfo.last_name).trim();
-              pos = 'DEF';
-            } else {
-              name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
-              pos = dbInfo.position || '';
-            }
+            if (dbInfo.position === 'PICK') { name = dbInfo.full_name; pos = 'PICK'; }
+            else if (dbInfo.position === 'DEF') { name = (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = 'DEF'; }
+            else { name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = dbInfo.position || ''; }
           }
 
-          // Uses strictly FantasyCalc (.fc) value for Trade Analyzer
           let val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
           
-          // Fallback name lookup if ID mapping missed
           if (val === 0 && dbInfo) {
             let searchName = "";
             if (dbInfo.position === 'PICK') searchName = dbInfo.full_name;
@@ -728,7 +806,7 @@
             <div class="player-pill">
               <div><span class="fw-bold">${name}</span> <span class="badge bg-secondary ms-1">${pos}</span></div>
               <div class="d-flex align-items-center gap-3">
-                <span class="text-info fw-semibold">${val.toLocaleString()}</span>
+                <span class="text-info fw-semibold fs-5">${val.toLocaleString()}</span>
                 <i class="bi bi-x-circle-fill remove-btn" onclick="removePlayerFromTrade('${side}', '${pid}')"></i>
               </div>
             </div>`;
@@ -747,35 +825,34 @@
 
       if (totalA === 0 && totalB === 0) {
         verdictEl.innerText = "Add players to evaluate";
-        verdictEl.className = "fw-bold mb-1";
+        verdictEl.className = "fw-bold mb-2";
         diffEl.innerText = "";
       } else if (totalA > totalB) {
         verdictEl.innerText = "Team A Favored";
-        verdictEl.className = "fw-bold mb-1 text-success";
+        verdictEl.className = "fw-bold mb-2 text-success";
         diffEl.innerText = `Difference: ${(totalA - totalB).toLocaleString()} pts`;
       } else if (totalB > totalA) {
         verdictEl.innerText = "Team B Favored";
-        verdictEl.className = "fw-bold mb-1 text-success";
+        verdictEl.className = "fw-bold mb-2 text-success";
         diffEl.innerText = `Difference: ${(totalB - totalA).toLocaleString()} pts`;
       } else {
         verdictEl.innerText = "Perfectly Balanced";
-        verdictEl.className = "fw-bold mb-1 text-warning";
+        verdictEl.className = "fw-bold mb-2 text-warning";
         diffEl.innerText = "Difference: 0 pts";
       }
     }
 
-    // --- TAB 4: LEAGUE VALUE BOARD (Uses Multi-source Aggregate) ---
     async function renderValueBoard() {
       const leagueId = document.getElementById('boardLeagueSelect').value;
       const container = document.getElementById('valueBoardContent');
       
       if (!leagueId) {
-        container.innerHTML = '<div class="text-center text-muted py-4">Select a league above to load the board.</div>';
+        container.innerHTML = '<div class="text-center text-muted py-5">Select a league above to load the board.</div>';
         return;
       }
 
       const lg = allLeaguesData.find(l => l.league_id === leagueId);
-      container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>';
+      container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
       try {
         const usersRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`);
@@ -793,7 +870,6 @@
               if (pid !== "0") {
                 let val = (marketValues[pid] && marketValues[pid].avg > 0) ? marketValues[pid].avg : 0;
                 
-                // Fallback name lookup for value board as well
                 if (val === 0 && nflPlayersDb[pid]) {
                   const dbInfo = nflPlayersDb[pid];
                   let searchName = "";
@@ -829,7 +905,7 @@
         teamValues.sort((a, b) => b.value - a.value);
 
         let html = `<table class="table table-dark table-hover align-middle mt-3">
-          <thead><tr class="text-secondary small">
+          <thead><tr class="text-secondary small text-uppercase">
             <th>Rank</th><th>Manager</th><th>Record</th><th class="text-end">Total Market Value</th>
           </tr></thead><tbody>`;
 
@@ -837,9 +913,9 @@
           html += `
             <tr>
               <td class="fw-bold text-muted">#${index + 1}</td>
-              <td class="fw-bold text-white">${t.owner}</td>
+              <td class="fw-bold text-white text-nowrap">${t.owner}</td>
               <td>${t.wins}-${t.losses}</td>
-              <td class="text-end fw-bold text-info">${t.value.toLocaleString()}</td>
+              <td class="text-end fw-bold text-info fs-5">${t.value.toLocaleString()}</td>
             </tr>
           `;
         });
@@ -847,11 +923,10 @@
         container.innerHTML = html;
 
       } catch(err) {
-        container.innerHTML = '<div class="text-danger py-4">Failed to load league data.</div>';
+        container.innerHTML = '<div class="text-danger py-5 text-center">Failed to load league data.</div>';
       }
     }
 
-    // --- MODALS ---
     function openSharesModal(pid) {
       const dbInfo = nflPlayersDb[pid];
       let name = pid;
@@ -903,17 +978,17 @@
 
         let html = `
           <div class="row g-2 mb-4">
-            <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">Rank</div><div class="fw-bold fs-5 text-warning">${rank}</div></div></div>
-            <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">Record</div><div class="fw-bold fs-5 text-success">${record}</div></div></div>
-            <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">PF</div><div class="fw-bold fs-5">${pf}</div></div></div>
-            <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">Max PF</div><div class="fw-bold fs-5 text-info">${maxPf}</div></div></div>
+            <div class="col-6 col-sm-3"><div class="stat-box"><div class="small text-muted mb-1">Rank</div><div class="fw-bold fs-5 text-warning">${rank}</div></div></div>
+            <div class="col-6 col-sm-3"><div class="stat-box"><div class="small text-muted mb-1">Record</div><div class="fw-bold fs-5 text-success">${record}</div></div></div>
+            <div class="col-6 col-sm-3"><div class="stat-box"><div class="small text-muted mb-1">PF</div><div class="fw-bold fs-5">${pf}</div></div></div>
+            <div class="col-6 col-sm-3"><div class="stat-box"><div class="small text-muted mb-1">Max PF</div><div class="fw-bold fs-5 text-info">${maxPf}</div></div></div>
           </div>
         `;
 
         const starters = roster.starters || [];
         const bench = roster.players.filter(p => !starters.includes(p));
 
-        html += `<h6 class="fw-bold text-primary mb-2">Starters</h6><ul class="list-group list-group-flush mb-4 border-top border-secondary">`;
+        html += `<h6 class="fw-bold text-primary mb-2 mt-3">Starters</h6><ul class="list-group list-group-flush mb-4 border-top border-secondary">`;
         starters.forEach(pid => {
            if (pid === "0") return; 
            const dbInfo = nflPlayersDb[pid];
@@ -925,8 +1000,8 @@
            }
 
            html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between py-2 px-1">
-              <div><strong>${name}</strong> <span class="small text-muted">${team}</span></div>
-              <span class="badge bg-primary bg-opacity-75">${pos}</span>
+              <div><strong class="d-block d-sm-inline">${name}</strong> <span class="small text-muted">${team}</span></div>
+              <span class="badge bg-primary bg-opacity-75 align-self-start align-self-sm-center">${pos}</span>
            </li>`;
         });
         
@@ -941,8 +1016,8 @@
            }
 
            html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between py-2 px-1">
-              <div>${name} <span class="small text-muted">${team}</span></div>
-              <span class="badge bg-secondary bg-opacity-50">${pos}</span>
+              <div><span class="d-block d-sm-inline">${name}</span> <span class="small text-muted">${team}</span></div>
+              <span class="badge bg-secondary bg-opacity-50 align-self-start align-self-sm-center">${pos}</span>
            </li>`;
         });
         html += `</ul>`;
