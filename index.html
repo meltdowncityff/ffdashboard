@@ -73,6 +73,7 @@
       background: #151722;
       padding: 1.5rem 0;
     }
+    .hover-white:hover { color: #fff !important; }
   </style>
 </head>
 <body>
@@ -151,7 +152,7 @@
           <!-- Team A -->
           <div class="col-md-6">
             <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideA" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player...">
+              <input type="text" id="inputSideA" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick...">
               <button class="btn btn-outline-primary" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side" id="listSideA"></div>
@@ -164,7 +165,7 @@
           <!-- Team B -->
           <div class="col-md-6">
             <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideB" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player...">
+              <input type="text" id="inputSideB" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player or pick...">
               <button class="btn btn-outline-primary" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side" id="listSideB"></div>
@@ -215,7 +216,7 @@
     </div>
   </footer>
 
-  <!-- Roster Modal (Unchanged) -->
+  <!-- Roster Modal -->
   <div class="modal fade" id="rosterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content text-white" style="background: #1a1d2d; border: 1px solid #3b4261;">
@@ -228,7 +229,7 @@
     </div>
   </div>
 
-  <!-- Player Shares Modal (Unchanged) -->
+  <!-- Player Shares Modal -->
   <div class="modal fade" id="sharesModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content text-white" style="background: #1a1d2d; border: 1px solid #3b4261;">
@@ -240,10 +241,6 @@
       </div>
     </div>
   </div>
-
-  <style>
-    .hover-white:hover { color: #fff !important; }
-  </style>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -300,7 +297,6 @@
 
     // --- MARKET DATA FETCHING ---
     async function fetchMarketData() {
-      // Initialize object
       Object.keys(nflPlayersDb).forEach(id => {
         marketValues[id] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
       });
@@ -320,7 +316,7 @@
         });
       } catch (e) { console.warn("FantasyCalc fetch error:", e); }
 
-      // 2. Stats Guy Fantasy (Best-effort extraction)
+      // 2. Stats Guy Fantasy
       try {
         const sgRes = await fetch('https://api.statsguyfantasy.com/api/v1/rankings');
         const sgData = await sgRes.json();
@@ -334,9 +330,9 @@
             marketValues[sId].validSources++;
           }
         });
-      } catch (e) { console.warn("Stats Guy fetch error (may be CORS restricted in browser):", e); }
+      } catch (e) { console.warn("Stats Guy fetch error:", e); }
 
-      // 3. Dynasty Dealer (Best-effort extraction)
+      // 3. Dynasty Dealer
       try {
         const ddRes = await fetch('https://www.dynastydealer.com/api/player-values');
         const ddData = await ddRes.json();
@@ -350,7 +346,7 @@
             marketValues[sId].validSources++;
           }
         });
-      } catch (e) { console.warn("Dynasty Dealer fetch error (may be CORS restricted in browser):", e); }
+      } catch (e) { console.warn("Dynasty Dealer fetch error:", e); }
 
       // Finalize Averages
       Object.keys(marketValues).forEach(id => {
@@ -361,16 +357,65 @@
     }
 
     function buildSearchDatalist() {
-      const dl = document.getElementById('playerSearchList');
-      let html = '';
-      Object.keys(nflPlayersDb).forEach(id => {
-        const p = nflPlayersDb[id];
-        if (p.position === 'DEF' || ['QB','RB','WR','TE','K'].includes(p.position)) {
+      const datalist = document.getElementById('playerSearchList');
+      if (!datalist) return;
+      datalist.innerHTML = '';
+
+      // 1. Add regular players from database
+      if (window.nflPlayersDb && typeof window.nflPlayersDb === 'object') {
+        Object.keys(window.nflPlayersDb).forEach(id => {
+          const p = window.nflPlayersDb[id];
           const name = p.position === 'DEF' ? (p.first_name + " " + p.last_name).trim() : p.full_name || (p.first_name + " " + p.last_name).trim();
-          html += `<option value="${name} - ${p.position} - ${p.team || 'FA'} [${id}]"></option>`;
-        }
+          const pos = p.position;
+          const team = p.team || '';
+          
+          if (['QB', 'RB', 'WR', 'TE', 'K', 'DEF', 'PICK'].includes(pos)) {
+            const option = document.createElement('option');
+            option.value = `${name} - ${pos} - ${team || 'FA'} [${id}]`;
+            datalist.appendChild(option);
+          }
+        });
+      }
+
+      // 2. Ensure standard Dynasty draft picks are available as selectable options
+      const currentYear = new Date().getFullYear();
+      const pickYears = [currentYear, currentYear + 1, currentYear + 2];
+      const rounds = [1, 2, 3, 4];
+
+      pickYears.forEach(year => {
+        rounds.forEach(round => {
+          const ordinal = round === 1 ? '1st' : round === 2 ? '2nd' : round === 3 ? '3rd' : '4th';
+          const pickName = `${year} ${ordinal} round pick`;
+          const syntheticId = `pick_${year}_${round}`;
+          
+          const pickVal = getDefaultPickValue(round, year);
+          if (!nflPlayersDb[syntheticId]) {
+            nflPlayersDb[syntheticId] = {
+              full_name: pickName,
+              position: 'PICK',
+              team: 'PICK'
+            };
+            if (typeof marketValues !== 'undefined') {
+              marketValues[syntheticId] = { fc: pickVal, sg: pickVal, dd: pickVal, avg: pickVal, validSources: 1 };
+            }
+          }
+
+          const option = document.createElement('option');
+          option.value = `${pickName} - PICK - [${syntheticId}]`;
+          datalist.appendChild(option);
+        });
       });
-      dl.innerHTML = html;
+    }
+
+    function getDefaultPickValue(round, year) {
+      const baseValues = { 1: 5500, 2: 2800, 3: 1300, 4: 600 };
+      let val = baseValues[round] || 1000;
+      
+      const yearDiff = year - new Date().getFullYear();
+      if (yearDiff > 0) {
+        val *= Math.pow(0.85, yearDiff);
+      }
+      return Math.round(val);
     }
 
     document.getElementById('fetchBtn').addEventListener('click', async () => {
@@ -392,7 +437,6 @@
             const dbRes = await fetch('https://api.sleeper.app/v1/players/nfl');
             nflPlayersDb = await dbRes.json();
             isDbLoaded = true;
-            buildSearchDatalist();
           } catch (dbErr) {
             console.error("Failed to fetch player database.", dbErr);
             alert("Could not load player names.");
@@ -400,6 +444,7 @@
           
           showLoading('Fetching Market Values (FantasyCalc, StatsGuy, DynastyDealer)...');
           await fetchMarketData();
+          buildSearchDatalist();
         }
 
         showLoading(`Fetching ${season} Leagues & Rosters...`);
@@ -435,7 +480,6 @@
             const myRank = sortedRosters.findIndex(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id))) + 1;
             const myRoster = sortedRosters.find(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id)));
             
-            // Store EVERYTHING on the league object for the Value Board
             lg.allRosters = sortedRosters; 
 
             if (myRoster) {
@@ -541,6 +585,9 @@
           if (dbInfo.position === 'DEF') {
             name = (dbInfo.first_name + " " + dbInfo.last_name).trim() || dbInfo.team;
             pos = 'DEF';
+          } else if (dbInfo.position === 'PICK') {
+            name = dbInfo.full_name;
+            pos = 'PICK';
           } else {
             name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
             pos = dbInfo.position || 'UNK';
@@ -578,7 +625,7 @@
       const val = input.value;
       const match = val.match(/\[(.*?)\]/);
       
-      if (!match) return alert("Please select a valid player from the dropdown.");
+      if (!match) return alert("Please select a valid player or pick from the dropdown.");
       const pid = match[1];
 
       if (side === 'A' && !tradeSideA.includes(pid)) tradeSideA.push(pid);
@@ -602,8 +649,21 @@
         let html = '';
         arr.forEach(pid => {
           const dbInfo = nflPlayersDb[pid];
-          const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
-          const pos = dbInfo ? dbInfo.position : '';
+          let name = pid;
+          let pos = '';
+          if (dbInfo) {
+            if (dbInfo.position === 'PICK') {
+              name = dbInfo.full_name;
+              pos = 'PICK';
+            } else if (dbInfo.position === 'DEF') {
+              name = (dbInfo.first_name + " " + dbInfo.last_name).trim();
+              pos = 'DEF';
+            } else {
+              name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
+              pos = dbInfo.position || '';
+            }
+          }
+
           const val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
           
           if (side === 'A') totalA += val;
@@ -663,7 +723,6 @@
       container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>';
 
       try {
-        // Fetch users to map owner_id to display_name
         const usersRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`);
         const users = await usersRes.json();
         
@@ -722,10 +781,15 @@
       }
     }
 
-    // --- MODALS (Unchanged functionality) ---
+    // --- MODALS ---
     function openSharesModal(pid) {
       const dbInfo = nflPlayersDb[pid];
-      const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
+      let name = pid;
+      if (dbInfo) {
+        if (dbInfo.position === 'PICK') name = dbInfo.full_name;
+        else if (dbInfo.position === 'DEF') name = (dbInfo.first_name + " " + dbInfo.last_name).trim();
+        else name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
+      }
       document.getElementById('sharesModalTitle').innerText = `${name} Shares`;
       
       const leagues = globalPlayerShares[pid]?.leagues || [];
@@ -783,26 +847,32 @@
         starters.forEach(pid => {
            if (pid === "0") return; 
            const dbInfo = nflPlayersDb[pid];
-           const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
-           const pos = dbInfo ? dbInfo.position : '';
-           const team = dbInfo ? dbInfo.team : '';
+           let name = pid, pos = '', team = '';
+           if (dbInfo) {
+             if (dbInfo.position === 'PICK') { name = dbInfo.full_name; pos = 'PICK'; }
+             else if (dbInfo.position === 'DEF') { name = (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = 'DEF'; team = dbInfo.team || ''; }
+             else { name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = dbInfo.position || ''; team = dbInfo.team || ''; }
+           }
 
            html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between py-2 px-1">
-              <div><strong>${name}</strong> <span class="small text-muted">${team || ''}</span></div>
-              <span class="badge bg-primary bg-opacity-75">${pos || ''}</span>
+              <div><strong>${name}</strong> <span class="small text-muted">${team}</span></div>
+              <span class="badge bg-primary bg-opacity-75">${pos}</span>
            </li>`;
         });
         
         html += `</ul><h6 class="fw-bold text-secondary mb-2">Bench</h6><ul class="list-group list-group-flush border-top border-secondary">`;
         bench.forEach(pid => {
            const dbInfo = nflPlayersDb[pid];
-           const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
-           const pos = dbInfo ? dbInfo.position : '';
-           const team = dbInfo ? dbInfo.team : '';
+           let name = pid, pos = '', team = '';
+           if (dbInfo) {
+             if (dbInfo.position === 'PICK') { name = dbInfo.full_name; pos = 'PICK'; }
+             else if (dbInfo.position === 'DEF') { name = (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = 'DEF'; team = dbInfo.team || ''; }
+             else { name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = dbInfo.position || ''; team = dbInfo.team || ''; }
+           }
 
            html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between py-2 px-1">
-              <div>${name} <span class="small text-muted">${team || ''}</span></div>
-              <span class="badge bg-secondary bg-opacity-50">${pos || ''}</span>
+              <div>${name} <span class="small text-muted">${team}</span></div>
+              <span class="badge bg-secondary bg-opacity-50">${pos}</span>
            </li>`;
         });
         html += `</ul>`;
