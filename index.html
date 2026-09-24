@@ -13,6 +13,9 @@
       background-color: #0f111a;
       font-family: 'Inter', sans-serif;
       color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     .glass-card {
       background: #1a1d2d;
@@ -58,6 +61,18 @@
       padding: 10px;
       text-align: center;
     }
+    
+    .trade-side { min-height: 250px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 15px; }
+    .player-pill { background: #3b4261; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .remove-btn { cursor: pointer; color: #f87171; }
+    .remove-btn:hover { color: #fca5a5; }
+
+    footer {
+      margin-top: auto;
+      border-top: 1px solid #3b4261;
+      background: #151722;
+      padding: 1.5rem 0;
+    }
   </style>
 </head>
 <body>
@@ -75,18 +90,20 @@
   </nav>
 
   <!-- Main Area -->
-  <div class="container-fluid px-4">
+  <div class="container-fluid px-4 mb-5">
     
     <!-- Tab Controls -->
-    <div class="d-flex gap-2 mb-4">
+    <div class="d-flex flex-wrap gap-2 mb-4">
       <button class="custom-tab active" onclick="switchTab('leaguesTab', this)">My Leagues</button>
       <button class="custom-tab" onclick="switchTab('playersTab', this)">My Players</button>
+      <button class="custom-tab" onclick="switchTab('analyzerTab', this)">Trade Analyzer</button>
+      <button class="custom-tab" onclick="switchTab('valueBoardTab', this)">League Value Board</button>
     </div>
 
     <!-- Loading State -->
     <div id="loadingIndicator" class="text-center py-5 d-none">
       <div class="spinner-border text-primary" role="status"></div>
-      <div id="loadingText" class="mt-3 text-muted">Fetching Leagues...</div>
+      <div id="loadingText" class="mt-3 text-muted">Fetching Data...</div>
     </div>
 
     <!-- TAB 1: Leagues -->
@@ -117,9 +134,88 @@
       </div>
     </div>
 
+    <!-- TAB 3: Trade Analyzer -->
+    <div id="analyzerTab" class="tab-content">
+      <div class="glass-card p-4">
+        <div class="row text-center mb-4">
+          <div class="col-12">
+            <h5 class="fw-bold text-white mb-1">Dynasty Trade Analyzer</h5>
+            <p class="text-muted small">Values powered by FantasyCalc (Superflex/PPR)</p>
+          </div>
+        </div>
+        
+        <!-- Datalist for Player Search -->
+        <datalist id="playerSearchList"></datalist>
+
+        <div class="row g-4">
+          <!-- Team A -->
+          <div class="col-md-6">
+            <div class="d-flex gap-2 mb-3">
+              <input type="text" id="inputSideA" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player...">
+              <button class="btn btn-outline-primary" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
+            </div>
+            <div class="trade-side" id="listSideA"></div>
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+              <span class="fs-5 fw-bold text-secondary">Team A Total:</span>
+              <span class="fs-4 fw-bold text-white" id="totalSideA">0</span>
+            </div>
+          </div>
+
+          <!-- Team B -->
+          <div class="col-md-6">
+            <div class="d-flex gap-2 mb-3">
+              <input type="text" id="inputSideB" class="form-control bg-dark text-white border-secondary" list="playerSearchList" placeholder="Search player...">
+              <button class="btn btn-outline-primary" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
+            </div>
+            <div class="trade-side" id="listSideB"></div>
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+              <span class="fs-5 fw-bold text-secondary">Team B Total:</span>
+              <span class="fs-4 fw-bold text-white" id="totalSideB">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-5 pt-3 border-top border-secondary">
+          <h4 class="fw-bold mb-1" id="tradeVerdict">Add players to evaluate</h4>
+          <p class="text-muted" id="tradeDiff"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: League Value Board -->
+    <div id="valueBoardTab" class="tab-content">
+      <div class="glass-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h5 class="fw-bold text-white mb-1">League Value Board</h5>
+            <p class="text-muted small mb-0">Total roster values aggregated from FantasyCalc, Stats Guy, & Dynasty Dealer.</p>
+          </div>
+          <select id="boardLeagueSelect" class="form-select bg-dark text-white border-secondary w-auto" onchange="renderValueBoard()">
+            <option value="">Select a League...</option>
+          </select>
+        </div>
+
+        <div id="valueBoardContent">
+          <div class="text-center text-muted py-4">Select a league above to load the board.</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Roster Modal -->
+  <!-- Footer Credits -->
+  <footer>
+    <div class="container text-center">
+      <div class="small text-muted mb-2">Market values supplied by public APIs.</div>
+      <div class="d-flex justify-content-center gap-4">
+        <a href="https://fantasycalc.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-calculator"></i> FantasyCalc</a>
+        <a href="https://statsguyfantasy.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-bar-chart"></i> Stats Guy Fantasy</a>
+        <a href="https://dynastydealer.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-tags"></i> Dynasty Dealer</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Roster Modal (Unchanged) -->
   <div class="modal fade" id="rosterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content text-white" style="background: #1a1d2d; border: 1px solid #3b4261;">
@@ -132,7 +228,7 @@
     </div>
   </div>
 
-  <!-- Player Shares Modal -->
+  <!-- Player Shares Modal (Unchanged) -->
   <div class="modal fade" id="sharesModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content text-white" style="background: #1a1d2d; border: 1px solid #3b4261;">
@@ -145,12 +241,23 @@
     </div>
   </div>
 
+  <style>
+    .hover-white:hover { color: #fff !important; }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let nflPlayersDb = {}; 
     let allLeaguesData = [];
-    let globalPlayerShares = {}; // Track shares globally for modal access
+    let globalPlayerShares = {}; 
     let isDbLoaded = false;
+    
+    // Market Values Storage
+    let marketValues = {}; 
+    
+    // Trade Analyzer State
+    let tradeSideA = [];
+    let tradeSideB = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       const currentYear = new Date().getMonth() < 2 ? new Date().getFullYear() - 1 : new Date().getFullYear();
@@ -181,7 +288,6 @@
       document.getElementById('loadingIndicator').classList.add('d-none');
     }
 
-    // Helper Functions for calculating scores safely
     function calcPF(settings) {
       if (!settings) return 0;
       return (settings.fpts || 0) + ((settings.fpts_decimal || 0) / 100);
@@ -190,6 +296,81 @@
     function calcMaxPF(settings) {
       if (!settings) return 0;
       return (settings.ppts || settings.fpts || 0) + ((settings.ppts_decimal || settings.fpts_decimal || 0) / 100);
+    }
+
+    // --- MARKET DATA FETCHING ---
+    async function fetchMarketData() {
+      // Initialize object
+      Object.keys(nflPlayersDb).forEach(id => {
+        marketValues[id] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+      });
+
+      // 1. FantasyCalc
+      try {
+        const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1');
+        const fcData = await fcRes.json();
+        fcData.forEach(item => {
+          const sId = item.player?.sleeperId || item.sleeperId;
+          const val = item.value || 0;
+          if (sId && marketValues[sId]) {
+            marketValues[sId].fc = val;
+            marketValues[sId].avg += val;
+            marketValues[sId].validSources++;
+          }
+        });
+      } catch (e) { console.warn("FantasyCalc fetch error:", e); }
+
+      // 2. Stats Guy Fantasy (Best-effort extraction)
+      try {
+        const sgRes = await fetch('https://api.statsguyfantasy.com/api/v1/rankings');
+        const sgData = await sgRes.json();
+        const arr = Array.isArray(sgData) ? sgData : (sgData.data || []);
+        arr.forEach(item => {
+          const sId = item.sleeper_id || item.sleeperId;
+          const val = item.value || 0;
+          if (sId && marketValues[sId]) {
+            marketValues[sId].sg = val;
+            marketValues[sId].avg += val;
+            marketValues[sId].validSources++;
+          }
+        });
+      } catch (e) { console.warn("Stats Guy fetch error (may be CORS restricted in browser):", e); }
+
+      // 3. Dynasty Dealer (Best-effort extraction)
+      try {
+        const ddRes = await fetch('https://www.dynastydealer.com/api/player-values');
+        const ddData = await ddRes.json();
+        const arr = Array.isArray(ddData) ? ddData : (ddData.data || []);
+        arr.forEach(item => {
+          const sId = item.sleeper_id || item.sleeperId;
+          const val = item.value || 0;
+          if (sId && marketValues[sId]) {
+            marketValues[sId].dd = val;
+            marketValues[sId].avg += val;
+            marketValues[sId].validSources++;
+          }
+        });
+      } catch (e) { console.warn("Dynasty Dealer fetch error (may be CORS restricted in browser):", e); }
+
+      // Finalize Averages
+      Object.keys(marketValues).forEach(id => {
+        if (marketValues[id].validSources > 0) {
+          marketValues[id].avg = Math.round(marketValues[id].avg / marketValues[id].validSources);
+        }
+      });
+    }
+
+    function buildSearchDatalist() {
+      const dl = document.getElementById('playerSearchList');
+      let html = '';
+      Object.keys(nflPlayersDb).forEach(id => {
+        const p = nflPlayersDb[id];
+        if (p.position === 'DEF' || ['QB','RB','WR','TE','K'].includes(p.position)) {
+          const name = p.position === 'DEF' ? (p.first_name + " " + p.last_name).trim() : p.full_name || (p.first_name + " " + p.last_name).trim();
+          html += `<option value="${name} - ${p.position} - ${p.team || 'FA'} [${id}]"></option>`;
+        }
+      });
+      dl.innerHTML = html;
     }
 
     document.getElementById('fetchBtn').addEventListener('click', async () => {
@@ -206,15 +387,19 @@
         if (!userData || !userData.user_id) throw new Error('User not found.');
 
         if (!isDbLoaded) {
-          showLoading('Downloading NFL Player Database (this takes ~5 seconds once per session)...');
+          showLoading('Downloading NFL Player Database...');
           try {
             const dbRes = await fetch('https://api.sleeper.app/v1/players/nfl');
             nflPlayersDb = await dbRes.json();
             isDbLoaded = true;
+            buildSearchDatalist();
           } catch (dbErr) {
             console.error("Failed to fetch player database.", dbErr);
-            alert("Could not load player names. The server may be busy.");
+            alert("Could not load player names.");
           }
+          
+          showLoading('Fetching Market Values (FantasyCalc, StatsGuy, DynastyDealer)...');
+          await fetchMarketData();
         }
 
         showLoading(`Fetching ${season} Leagues & Rosters...`);
@@ -230,6 +415,9 @@
         allLeaguesData = [];
         globalPlayerShares = {};
 
+        const boardSelect = document.getElementById('boardLeagueSelect');
+        boardSelect.innerHTML = '<option value="">Select a League...</option>';
+
         for (const lg of leagues) {
           try {
             const rRes = await fetch(`https://api.sleeper.app/v1/league/${lg.league_id}/rosters`);
@@ -237,7 +425,6 @@
             
             const rosters = await rRes.json();
             
-            // Calculate standings to get team rank
             const sortedRosters = rosters.sort((a, b) => {
               const aPct = ((a.settings?.wins || 0) + ((a.settings?.ties || 0) * 0.5)) / ((a.settings?.wins || 0) + (a.settings?.losses || 0) + (a.settings?.ties || 0) || 1);
               const bPct = ((b.settings?.wins || 0) + ((b.settings?.ties || 0) * 0.5)) / ((b.settings?.wins || 0) + (b.settings?.losses || 0) + (b.settings?.ties || 0) || 1);
@@ -248,10 +435,15 @@
             const myRank = sortedRosters.findIndex(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id))) + 1;
             const myRoster = sortedRosters.find(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id)));
             
+            // Store EVERYTHING on the league object for the Value Board
+            lg.allRosters = sortedRosters; 
+
             if (myRoster) {
               myRoster.rank = myRank;
               lg.myRoster = myRoster;
               allLeaguesData.push(lg);
+
+              boardSelect.innerHTML += `<option value="${lg.league_id}">${lg.name}</option>`;
 
               if (myRoster.players) {
                 myRoster.players.forEach(pid => {
@@ -276,6 +468,7 @@
       }
     });
 
+    // --- TAB 1 & 2 RENDERING ---
     function renderLeagues(leagues) {
       let lineup = [], bestball = [];
 
@@ -379,15 +572,164 @@
       });
     }
 
+    // --- TAB 3: TRADE ANALYZER ---
+    function addPlayerToTrade(side) {
+      const input = document.getElementById(side === 'A' ? 'inputSideA' : 'inputSideB');
+      const val = input.value;
+      const match = val.match(/\[(.*?)\]/);
+      
+      if (!match) return alert("Please select a valid player from the dropdown.");
+      const pid = match[1];
+
+      if (side === 'A' && !tradeSideA.includes(pid)) tradeSideA.push(pid);
+      if (side === 'B' && !tradeSideB.includes(pid)) tradeSideB.push(pid);
+      
+      input.value = '';
+      updateTradeAnalyzer();
+    }
+
+    function removePlayerFromTrade(side, pid) {
+      if (side === 'A') tradeSideA = tradeSideA.filter(id => id !== pid);
+      if (side === 'B') tradeSideB = tradeSideB.filter(id => id !== pid);
+      updateTradeAnalyzer();
+    }
+
+    function updateTradeAnalyzer() {
+      let totalA = 0;
+      let totalB = 0;
+
+      const renderSide = (arr, side) => {
+        let html = '';
+        arr.forEach(pid => {
+          const dbInfo = nflPlayersDb[pid];
+          const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
+          const pos = dbInfo ? dbInfo.position : '';
+          const val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
+          
+          if (side === 'A') totalA += val;
+          if (side === 'B') totalB += val;
+
+          html += `
+            <div class="player-pill">
+              <div><span class="fw-bold">${name}</span> <span class="badge bg-secondary ms-1">${pos}</span></div>
+              <div class="d-flex align-items-center gap-3">
+                <span class="text-info fw-semibold">${val}</span>
+                <i class="bi bi-x-circle-fill remove-btn" onclick="removePlayerFromTrade('${side}', '${pid}')"></i>
+              </div>
+            </div>`;
+        });
+        document.getElementById(side === 'A' ? 'listSideA' : 'listSideB').innerHTML = html;
+      };
+
+      renderSide(tradeSideA, 'A');
+      renderSide(tradeSideB, 'B');
+
+      document.getElementById('totalSideA').innerText = totalA.toLocaleString();
+      document.getElementById('totalSideB').innerText = totalB.toLocaleString();
+
+      const verdictEl = document.getElementById('tradeVerdict');
+      const diffEl = document.getElementById('tradeDiff');
+
+      if (totalA === 0 && totalB === 0) {
+        verdictEl.innerText = "Add players to evaluate";
+        verdictEl.className = "fw-bold mb-1";
+        diffEl.innerText = "";
+      } else if (totalA > totalB) {
+        verdictEl.innerText = "Team A Favored";
+        verdictEl.className = "fw-bold mb-1 text-success";
+        diffEl.innerText = `Difference: ${(totalA - totalB).toLocaleString()} pts`;
+      } else if (totalB > totalA) {
+        verdictEl.innerText = "Team B Favored";
+        verdictEl.className = "fw-bold mb-1 text-success";
+        diffEl.innerText = `Difference: ${(totalB - totalA).toLocaleString()} pts`;
+      } else {
+        verdictEl.innerText = "Perfectly Balanced";
+        verdictEl.className = "fw-bold mb-1 text-warning";
+        diffEl.innerText = "Difference: 0 pts";
+      }
+    }
+
+    // --- TAB 4: LEAGUE VALUE BOARD ---
+    async function renderValueBoard() {
+      const leagueId = document.getElementById('boardLeagueSelect').value;
+      const container = document.getElementById('valueBoardContent');
+      
+      if (!leagueId) {
+        container.innerHTML = '<div class="text-center text-muted py-4">Select a league above to load the board.</div>';
+        return;
+      }
+
+      const lg = allLeaguesData.find(l => l.league_id === leagueId);
+      container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>';
+
+      try {
+        // Fetch users to map owner_id to display_name
+        const usersRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`);
+        const users = await usersRes.json();
+        
+        const userMap = {};
+        users.forEach(u => userMap[u.user_id] = u.display_name);
+
+        let teamValues = [];
+
+        lg.allRosters.forEach(roster => {
+          let totalValue = 0;
+          if (roster.players) {
+            roster.players.forEach(pid => {
+              if (pid !== "0" && marketValues[pid] && marketValues[pid].avg > 0) {
+                totalValue += marketValues[pid].avg;
+              }
+            });
+          }
+
+          let ownerName = userMap[roster.owner_id] || 'Unknown';
+          if (roster.co_owners) {
+             const coOwnerNames = roster.co_owners.map(id => userMap[id] || 'Unknown').join(' & ');
+             ownerName += ` / ${coOwnerNames}`;
+          }
+
+          teamValues.push({
+            owner: ownerName,
+            wins: roster.settings?.wins || 0,
+            losses: roster.settings?.losses || 0,
+            value: totalValue,
+            roster_id: roster.roster_id
+          });
+        });
+
+        teamValues.sort((a, b) => b.value - a.value);
+
+        let html = `<table class="table table-dark table-hover align-middle mt-3">
+          <thead><tr class="text-secondary small">
+            <th>Rank</th><th>Manager</th><th>Record</th><th class="text-end">Total Market Value</th>
+          </tr></thead><tbody>`;
+
+        teamValues.forEach((t, index) => {
+          html += `
+            <tr>
+              <td class="fw-bold text-muted">#${index + 1}</td>
+              <td class="fw-bold text-white">${t.owner}</td>
+              <td>${t.wins}-${t.losses}</td>
+              <td class="text-end fw-bold text-info">${t.value.toLocaleString()}</td>
+            </tr>
+          `;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+
+      } catch(err) {
+        container.innerHTML = '<div class="text-danger py-4">Failed to load league data.</div>';
+      }
+    }
+
+    // --- MODALS (Unchanged functionality) ---
     function openSharesModal(pid) {
       const dbInfo = nflPlayersDb[pid];
       const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
-      
       document.getElementById('sharesModalTitle').innerText = `${name} Shares`;
       
       const leagues = globalPlayerShares[pid]?.leagues || [];
       let html = `<div class="list-group list-group-flush">`;
-      
       leagues.forEach(lg => {
         html += `
           <button class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center py-3" onclick="jumpToRoster('${lg.id}')">
@@ -403,7 +745,6 @@
     }
 
     function jumpToRoster(leagueId) {
-      // Hide the shares modal, then open the roster modal
       const sModal = bootstrap.Modal.getInstance(document.getElementById('sharesModal'));
       if (sModal) sModal.hide();
       openRoster(leagueId);
@@ -426,7 +767,6 @@
         const maxPf = calcMaxPF(roster.settings).toFixed(1);
         const rank = roster.rank ? `#${roster.rank}` : '-';
 
-        // Stats Banner
         let html = `
           <div class="row g-2 mb-4">
             <div class="col-3"><div class="stat-box"><div class="small text-muted mb-1">Rank</div><div class="fw-bold fs-5 text-warning">${rank}</div></div></div>
@@ -441,7 +781,7 @@
 
         html += `<h6 class="fw-bold text-primary mb-2">Starters</h6><ul class="list-group list-group-flush mb-4 border-top border-secondary">`;
         starters.forEach(pid => {
-           if (pid === "0") return; // Empty slot for Sleeper
+           if (pid === "0") return; 
            const dbInfo = nflPlayersDb[pid];
            const name = dbInfo ? (dbInfo.position === 'DEF' ? dbInfo.first_name + " " + dbInfo.last_name : dbInfo.full_name || dbInfo.first_name + " " + dbInfo.last_name) : pid;
            const pos = dbInfo ? dbInfo.position : '';
