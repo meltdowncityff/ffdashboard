@@ -273,7 +273,7 @@
       pickYears.forEach(year => {
         rounds.forEach(round => {
           const ordinal = round === 1 ? '1st' : round === 2 ? '2nd' : round === 3 ? '3rd' : '4th';
-          const pickName = `${year} ${ordinal} round pick`;
+          const pickName = `${year} ${ordinal}`; // Matches FantasyCalc naming ("2027 1st")
           const syntheticId = `pick_${year}_${round}`;
           const pickVal = getDefaultPickValue(round, year);
 
@@ -334,7 +334,7 @@
         }
       });
 
-      // 1. FantasyCalc (Configured for Superflex, 12-Team, 1 PPR, TEP+)
+      // 1. FantasyCalc (Superflex, 12-Team, 1 PPR, TEP+)
       try {
         const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te+');
         const fcData = await fcRes.json();
@@ -345,12 +345,16 @@
           const name = (p.name || p.fullName || "").toLowerCase();
 
           let targetId = sId;
-          if (p.position === 'PICK' || name.includes('round pick') || name.includes('rd pick')) {
-            for (const id in nflPlayersDb) {
-              if (nflPlayersDb[id].position === 'PICK' && nflPlayersDb[id].full_name.toLowerCase() === name) {
-                targetId = id;
-                break;
-              }
+          if (p.position === 'PICK' || name.includes('pick') || name.includes('1st') || name.includes('2nd') || name.includes('3rd') || name.includes('4th')) {
+            const yearMatch = name.match(/(202\d)/);
+            let roundNum = null;
+            if (name.includes('1st') || name.match(/\b1\b/)) roundNum = 1;
+            else if (name.includes('2nd') || name.match(/\b2\b/)) roundNum = 2;
+            else if (name.includes('3rd') || name.match(/\b3\b/)) roundNum = 3;
+            else if (name.includes('4th') || name.match(/\b4\b/)) roundNum = 4;
+
+            if (yearMatch && roundNum) {
+              targetId = `pick_${yearMatch[1]}_${roundNum}`;
             }
           }
 
