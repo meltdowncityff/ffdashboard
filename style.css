@@ -10,16 +10,14 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
-  /* High-contrast football field background with a dark gradient overlay */
-  background-color: var(--bg-color);
-  background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.98)), 
-                    url('https://images.unsplash.com/photo-1508344928928-7137b29de216?auto=format&fit=crop&w=1920&q=80');
+  /* Cleaned definition with standard quotes */
+  background-color: #0f172a;
+  background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.98)), url("https://images.unsplash.com/photo-1508344928928-7137b29de216?auto=format&fit=crop&w=1920&q=80");
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  color: var(--text);
-  padding: 0;
+  color: #f8fafc;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
