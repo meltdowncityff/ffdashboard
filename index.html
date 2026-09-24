@@ -141,7 +141,7 @@
         <div class="row text-center mb-4">
           <div class="col-12">
             <h5 class="fw-bold text-white mb-1">Dynasty Trade Analyzer</h5>
-            <p class="text-muted small">Values powered by FantasyCalc (Superflex / 12-Team / 1 PPR / TEP+)</p>
+            <p class="text-muted small">Values strictly powered by FantasyCalc (Superflex / 12-Team / 1 PPR / TEP+)</p>
           </div>
         </div>
         
@@ -324,7 +324,7 @@
 
     // --- MARKET DATA FETCHING ---
     async function fetchMarketValueApi() {
-      // 1. FantasyCalc (Superflex, 12-Team, 1 PPR, TEP+) - Pulls exact independent values for every pick variation
+      // 1. FantasyCalc (Superflex, 12-Team, 1 PPR, TEP+)
       try {
         const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te+');
         const fcData = await fcRes.json();
@@ -382,7 +382,7 @@
         });
       } catch (e) { console.warn("Dynasty Dealer fetch error:", e); }
 
-      // Finalize Averages (Draft picks exclusively use FantasyCalc values)
+      // Finalize Averages (for League Value Board multi-source aggregate)
       Object.keys(marketValues).forEach(id => {
         const m = marketValues[id];
         if (id.startsWith('pick_')) {
@@ -627,7 +627,7 @@
       });
     }
 
-    // --- TAB 3: TRADE ANALYZER ---
+    // --- TAB 3: TRADE ANALYZER (Strictly FantasyCalc) ---
     function addPlayerToTrade(side) {
       const input = document.getElementById(side === 'A' ? 'inputSideA' : 'inputSideB');
       const val = input.value.trim();
@@ -686,7 +686,8 @@
             }
           }
 
-          const val = (marketValues[pid] && marketValues[pid].avg) ? marketValues[pid].avg : 0;
+          // Uses strictly FantasyCalc (.fc) value for Trade Analyzer
+          const val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
           
           if (side === 'A') totalA += val;
           if (side === 'B') totalB += val;
@@ -731,7 +732,7 @@
       }
     }
 
-    // --- TAB 4: LEAGUE VALUE BOARD ---
+    // --- TAB 4: LEAGUE VALUE BOARD (Uses Multi-source Aggregate) ---
     async function renderValueBoard() {
       const leagueId = document.getElementById('boardLeagueSelect').value;
       const container = document.getElementById('valueBoardContent');
@@ -757,6 +758,7 @@
           let totalValue = 0;
           if (roster.players) {
             roster.players.forEach(pid => {
+              // Uses multi-source aggregate (.avg) for League Value Board
               if (pid !== "0" && marketValues[pid] && marketValues[pid].avg > 0) {
                 totalValue += marketValues[pid].avg;
               }
