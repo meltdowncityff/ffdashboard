@@ -280,14 +280,18 @@
           const variants = ['', ' (Early)', ' (Mid)', ' (Late)'];
           variants.forEach(suffix => {
             const pickName = `${year} ${r.name}${suffix}`;
-            const pickId = `pick_${year}_${r.round}_${suffix.toLowerCase().replace(/[^a-z]/g, 'gen')}`;
+            // Corrected ID creation to exactly match what the API data maps to
+            const pickId = `pick_${pickName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
 
             nflPlayersDb[pickId] = {
               full_name: pickName,
               position: 'PICK',
               team: 'PICK'
             };
-            marketValues[pickId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+            
+            if (!marketValues[pickId]) {
+              marketValues[pickId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+            }
           });
         });
       });
@@ -326,11 +330,14 @@
     async function fetchMarketValueApi() {
       // 1. FantasyCalc (Superflex, 12-Team, 1 PPR, TEP+)
       try {
-        const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te+');
+        // MUST URL Encode the + sign as %2B otherwise it sends as a space and crashes the request
+        const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te%2B');
+        if (!fcRes.ok) throw new Error(`FantasyCalc responded with ${fcRes.status}`);
         const fcData = await fcRes.json();
+        
         fcData.forEach(item => {
           const p = item.player || item;
-          const sId = p.sleeperId || item.sleeperId || p.id || item.id;
+          const sId = p.sleeperId ? String(p.sleeperId) : String(p.id || item.id);
           const val = item.value || 0;
           const name = (p.name || p.fullName || "").trim();
           const pos = (p.position || "").toUpperCase();
@@ -344,13 +351,22 @@
               team: 'PICK'
             };
             
-            marketValues[pickId] = { fc: val, sg: 0, dd: 0, avg: val, validSources: 1 };
-          } else if (sId) {
-            if (!marketValues[sId]) {
-              marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+            if (!marketValues[pickId]) {
+              marketValues[pickId] = { fc: val, sg: 0, dd: 0, avg: val, validSources: 1 };
+            } else {
+              marketValues[pickId].fc = val;
+              marketValues[pickId].avg = val;
             }
-            marketValues[sId].fc = val;
-            marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
+          } else {
+            if (sId) {
+              if (!marketValues[sId]) marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+              marketValues[sId].fc = val;
+              marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
+            }
+            
+            // Backup mapping by name in case a rookie's Sleeper ID is missing from the API early in the season
+            const nameKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            marketValues[`name_${nameKey}`] = val;
           }
         });
       } catch (e) { console.warn("FantasyCalc fetch error:", e); }
@@ -364,9 +380,7 @@
           const sId = item.sleeper_id || item.sleeperId;
           const val = item.value || 0;
           if (sId) {
-            if (!marketValues[sId]) {
-              marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
-            }
+            if (!marketValues[sId]) marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
             marketValues[sId].sg = val;
             marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
           }
@@ -382,9 +396,7 @@
           const sId = item.sleeper_id || item.sleeperId;
           const val = item.value || 0;
           if (sId) {
-            if (!marketValues[sId]) {
-              marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
-            }
+            if (!marketValues[sId]) marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
             marketValues[sId].dd = val;
             marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
           }
@@ -393,6 +405,8 @@
 
       // Finalize Averages (for League Value Board multi-source aggregate)
       Object.keys(marketValues).forEach(id => {
+        if (id.startsWith('name_')) return; // skip name fallbacks
+        
         const m = marketValues[id];
         if (id.startsWith('pick_')) {
           m.avg = m.fc;
@@ -418,13 +432,9 @@
         let pos = p.position || 'UNK';
         let team = p.team || 'FA';
 
-        if (pos === 'PICK') {
-          name = p.full_name;
-        } else if (pos === 'DEF') {
-          name = (p.first_name + " " + p.last_name).trim();
-        } else {
-          name = p.full_name || (p.first_name + " " + p.last_name).trim();
-        }
+        if (pos === 'PICK') name = p.full_name;
+        else if (pos === 'DEF') name = (p.first_name + " " + p.last_name).trim();
+        else name = p.full_name || (p.first_name + " " + p.last_name).trim();
 
         if (['QB', 'RB', 'WR', 'TE', 'K', 'DEF', 'PICK'].includes(pos)) {
           const option = document.createElement('option');
@@ -696,7 +706,20 @@
           }
 
           // Uses strictly FantasyCalc (.fc) value for Trade Analyzer
-          const val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
+          let val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
+          
+          // Fallback name lookup if ID mapping missed
+          if (val === 0 && dbInfo) {
+            let searchName = "";
+            if (dbInfo.position === 'PICK') searchName = dbInfo.full_name;
+            else if (dbInfo.position === 'DEF') searchName = (dbInfo.first_name + " " + dbInfo.last_name).trim();
+            else searchName = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
+            
+            const nameKey = searchName.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (marketValues[`name_${nameKey}`]) {
+              val = marketValues[`name_${nameKey}`];
+            }
+          }
           
           if (side === 'A') totalA += val;
           if (side === 'B') totalB += val;
@@ -767,9 +790,23 @@
           let totalValue = 0;
           if (roster.players) {
             roster.players.forEach(pid => {
-              // Uses multi-source aggregate (.avg) for League Value Board
-              if (pid !== "0" && marketValues[pid] && marketValues[pid].avg > 0) {
-                totalValue += marketValues[pid].avg;
+              if (pid !== "0") {
+                let val = (marketValues[pid] && marketValues[pid].avg > 0) ? marketValues[pid].avg : 0;
+                
+                // Fallback name lookup for value board as well
+                if (val === 0 && nflPlayersDb[pid]) {
+                  const dbInfo = nflPlayersDb[pid];
+                  let searchName = "";
+                  if (dbInfo.position === 'PICK') searchName = dbInfo.full_name;
+                  else if (dbInfo.position === 'DEF') searchName = (dbInfo.first_name + " " + dbInfo.last_name).trim();
+                  else searchName = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
+                  
+                  const nameKey = searchName.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  if (marketValues[`name_${nameKey}`]) {
+                    val = marketValues[`name_${nameKey}`];
+                  }
+                }
+                totalValue += val;
               }
             });
           }
