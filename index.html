@@ -16,6 +16,8 @@
       --bg-dark: #0f111a;
       --card-bg: rgba(26, 29, 45, 0.75);
       --card-border: rgba(255, 255, 255, 0.08);
+      --accent-purple: #6f42c1;
+      --accent-blue: #0d6efd;
     }
 
     body {
@@ -71,14 +73,7 @@
       border-bottom: 1px solid var(--card-border);
     }
 
-    /* Badges */
     .badge-win { background: rgba(25, 135, 84, 0.2); color: #4ade80; border: 1px solid rgba(25, 135, 84, 0.3); }
-    .badge-rank { background: rgba(13, 110, 253, 0.2); color: #60a5fa; border: 1px solid rgba(13, 110, 253, 0.3); }
-    
-    /* Luck & Efficiency Badges */
-    .badge-luck-lucky { background: rgba(25, 135, 84, 0.2); color: #4ade80; border: 1px solid rgba(25, 135, 84, 0.3); }
-    .badge-luck-neutral { background: rgba(108, 117, 125, 0.2); color: #cbd5e1; border: 1px solid rgba(108, 117, 125, 0.3); }
-    .badge-luck-unlucky { background: rgba(220, 53, 69, 0.2); color: #f87171; border: 1px solid rgba(220, 53, 69, 0.3); }
 
     .nav-pills .nav-link {
       color: #94a3b8;
@@ -103,7 +98,7 @@
 </head>
 <body>
 
-  <!-- Top Glass Navigation -->
+  <!-- Top Navigation -->
   <nav class="navbar navbar-expand-lg sticky-top glass-nav py-3">
     <div class="container-fluid px-4">
       <a class="navbar-brand fs-4 d-flex align-items-center gap-2" href="#">
@@ -111,11 +106,9 @@
       </a>
       
       <div class="d-flex align-items-center gap-2 ms-auto">
-        <input type="text" id="usernameInput" class="form-control form-control-sm" style="width: 140px;" placeholder="Sleeper Username">
-        <select id="seasonSelect" class="form-select form-select-sm" style="width: 90px;">
-          <option value="2026" selected>2026</option>
-          <option value="2025">2025</option>
-          <option value="2024">2024</option>
+        <input type="text" id="usernameInput" class="form-control form-control-sm" style="width: 160px;" placeholder="Sleeper Username">
+        <select id="seasonSelect" class="form-select form-select-sm" style="width: 100px;">
+          <!-- Dynamically populated by JS -->
         </select>
         <button id="fetchBtn" class="btn btn-primary btn-sm rounded-3 px-3">
           <i class="bi bi-arrow-clockwise"></i> Load
@@ -126,116 +119,118 @@
 
   <!-- Main Container -->
   <div class="container-fluid px-4 py-4">
-    
-    <!-- Tab & Stats Bar -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-      <ul class="nav nav-pills glass-card p-2 gap-1" id="dashboardTabs" role="tablist">
+      <ul class="nav nav-pills glass-card p-2 gap-1">
         <li class="nav-item">
-          <button class="nav-link active" id="leagues-tab" data-bs-toggle="tab" data-bs-target="#leagues" type="button">
+          <button class="nav-link active" id="leagues-tab" type="button">
             <i class="bi bi-grid-fill me-1"></i> My Leagues
           </button>
         </li>
       </ul>
 
-      <!-- Summary Header Metrics -->
-      <div id="quickStats" class="d-flex gap-3 text-sm">
+      <div class="d-flex gap-3 text-sm">
         <div class="glass-card px-3 py-2 text-center">
-          <div class="text-secondary small">Total Leagues</div>
+          <div class="text-secondary small">Total Leagues (<span id="selectedSeasonLabel"></span>)</div>
           <div id="statTotalLeagues" class="fw-bold fs-5 text-white">0</div>
         </div>
-        <div class="glass-card px-3 py-2 text-center">
-          <div class="text-secondary small">Avg Lineup Efficiency</div>
-          <div id="statAvgEfficiency" class="fw-bold fs-5 text-info">0%</div>
-        </div>
       </div>
     </div>
 
-    <!-- LEAGUES TAB -->
-    <div class="tab-pane fade show active" id="leagues" role="tabpanel">
-      <div class="glass-card p-4">
-        <div class="table-responsive">
-          <table class="table align-middle" id="leaguesTable">
-            <thead>
-              <tr>
-                <th>League</th>
-                <th>Record</th>
-                <th>PF / MaxPF</th>
-                <th>Lineup Efficiency</th>
-                <th>Bench Pts Left</th>
-                <th>Schedule Luck</th>
-              </tr>
-            </thead>
-            <tbody id="leaguesTableBody">
-              <tr>
-                <td colspan="6" class="text-center text-muted py-5">Enter your Sleeper username above and click Load.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <!-- Leagues Table -->
+    <div class="glass-card p-4">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>League</th>
+              <th>Teams</th>
+              <th>Record</th>
+              <th>Points For</th>
+              <th>MaxPF</th>
+            </tr>
+          </thead>
+          <tbody id="leaguesTableBody">
+            <tr>
+              <td colspan="5" class="text-center text-muted py-5">Enter your Sleeper Username above to load your leagues.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    document.getElementById('fetchBtn').addEventListener('click', async () => {
+    // Calculate current NFL season year automatically
+    // (If date is before March, the season year belongs to the previous calendar year)
+    function getCurrentNFLSeason() {
+      const now = new Date();
+      const month = now.getMonth(); // 0 = Jan, 1 = Feb, 2 = Mar
+      const year = now.getFullYear();
+      return month < 2 ? year - 1 : year;
+    }
+
+    const currentSeason = getCurrentNFLSeason();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Setup Season Dropdown dynamically
+      const seasonSelect = document.getElementById('seasonSelect');
+      seasonSelect.innerHTML = `
+        <option value="${currentSeason}" selected>${currentSeason}</option>
+        <option value="${currentSeason - 1}">${currentSeason - 1}</option>
+        <option value="${currentSeason - 2}">${currentSeason - 2}</option>
+      `;
+
+      // Auto-load remembered username
+      const savedUser = localStorage.getItem('sleeper_username');
+      if (savedUser) {
+        document.getElementById('usernameInput').value = savedUser;
+        fetchLeagues();
+      }
+    });
+
+    document.getElementById('fetchBtn').addEventListener('click', fetchLeagues);
+
+    async function fetchLeagues() {
       const username = document.getElementById('usernameInput').value.trim();
       const season = document.getElementById('seasonSelect').value;
       if (!username) return alert('Please enter a Sleeper username.');
 
+      localStorage.setItem('sleeper_username', username);
+      document.getElementById('selectedSeasonLabel').textContent = season;
+
       const tbody = document.getElementById('leaguesTableBody');
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2 text-muted">Calculating League Efficiency & Luck Index...</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2 text-muted">Fetching ${season} leagues...</div></td></tr>`;
 
       try {
-        // 1. Fetch User ID
+        // 1. Fetch User Object
         const userRes = await fetch(`https://api.sleeper.app/v1/user/${username}`);
         const userData = await userRes.json();
-        if (!userData || !userData.user_id) throw new Error('User not found');
+        if (!userData || !userData.user_id) throw new Error('User not found.');
 
-        // 2. Fetch User Leagues
+        // 2. Fetch User Leagues for Selected Season
         const leaguesRes = await fetch(`https://api.sleeper.app/v1/user/${userData.user_id}/leagues/nfl/${season}`);
         const leagues = await leaguesRes.json();
 
-        let totalEff = 0;
-        let validLeaguesCount = 0;
+        document.getElementById('statTotalLeagues').textContent = leagues.length;
+
+        if (!Array.isArray(leagues) || leagues.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">No leagues found for ${username} in ${season}.</td></tr>`;
+          return;
+        }
+
         tbody.innerHTML = '';
 
+        // 3. Render Leagues
         for (const league of leagues) {
           const rostersRes = await fetch(`https://api.sleeper.app/v1/league/${league.league_id}/rosters`);
           const rosters = await rostersRes.json();
           const userRoster = rosters.find(r => r.owner_id === userData.user_id);
 
-          if (!userRoster) continue;
-
-          // Points metrics
-          const pf = parseFloat((userRoster.settings.fpts || 0) + '.' + (userRoster.settings.fpts_decimal || 0));
-          const maxPf = parseFloat((userRoster.settings.ppts || pf) + '.' + (userRoster.settings.ppts_decimal || 0));
-          const pa = parseFloat((userRoster.settings.fpts_against || 0) + '.' + (userRoster.settings.fpts_against_decimal || 0));
-
-          // Efficiency Calculation
-          const efficiency = maxPf > 0 ? ((pf / maxPf) * 100).toFixed(1) : '100.0';
-          const benchPts = (maxPf - pf).toFixed(1);
-
-          if (maxPf > 0) {
-            totalEff += parseFloat(efficiency);
-            validLeaguesCount++;
-          }
-
-          // Ranks for Luck Index
-          const sortedByPF = [...rosters].sort((a, b) => (b.settings.fpts || 0) - (a.settings.fpts || 0));
-          const sortedByPA = [...rosters].sort((a, b) => (b.settings.fpts_against || 0) - (a.settings.fpts_against || 0));
-          
-          const pfRank = sortedByPF.findIndex(r => r.owner_id === userData.user_id) + 1;
-          const paRank = sortedByPA.findIndex(r => r.owner_id === userData.user_id) + 1;
-
-          // Schedule Luck Grade Logic
-          let luckBadge = `<span class="badge badge-luck-neutral px-2 py-1">Neutral</span>`;
-          if (paRank <= pfRank - 3) {
-            luckBadge = `<span class="badge badge-luck-unlucky px-2 py-1"><i class="bi bi-hand-thumbs-down-fill me-1"></i>Unlucky (High PA)</span>`;
-          } else if (paRank >= pfRank + 3) {
-            luckBadge = `<span class="badge badge-luck-lucky px-2 py-1"><i class="bi bi-hand-thumbs-up-fill me-1"></i>Lucky (Low PA)</span>`;
-          }
+          const pf = userRoster ? parseFloat((userRoster.settings.fpts || 0) + '.' + (userRoster.settings.fpts_decimal || 0)) : 0;
+          const maxPf = userRoster ? parseFloat((userRoster.settings.ppts || pf) + '.' + (userRoster.settings.ppts_decimal || 0)) : 0;
+          const wins = userRoster ? (userRoster.settings.wins || 0) : 0;
+          const losses = userRoster ? (userRoster.settings.losses || 0) : 0;
 
           const avatar = league.avatar ? `https://sleepercdn.com/avatars/thumbs/${league.avatar}` : 'https://sleepercdn.com/images/v2/default_avatar-512x512.png';
 
@@ -246,28 +241,22 @@
                   <img src="${avatar}" class="avatar-img" alt="avatar">
                   <div>
                     <div class="fw-bold">${league.name}</div>
-                    <div class="small text-muted">${league.total_rosters} Teams</div>
+                    <div class="small text-muted">${league.season} Season</div>
                   </div>
                 </div>
               </td>
-              <td><span class="badge badge-win px-2 py-1 rounded-2">${userRoster.settings.wins} - ${userRoster.settings.losses}</span></td>
-              <td><span class="fw-semibold text-white">${pf.toFixed(1)}</span> / <span class="text-muted">${maxPf.toFixed(1)}</span></td>
-              <td>
-                <div class="fw-bold text-${efficiency >= 90 ? 'success' : efficiency >= 80 ? 'warning' : 'danger'}">${efficiency}%</div>
-              </td>
-              <td><span class="text-danger fw-semibold">-${benchPts} pts</span></td>
-              <td>${luckBadge}</td>
+              <td>${league.total_rosters} Teams</td>
+              <td><span class="badge badge-win px-2 py-1 rounded-2">${wins} - ${losses}</span></td>
+              <td class="fw-semibold text-white">${pf.toFixed(1)}</td>
+              <td class="text-muted">${maxPf.toFixed(1)}</td>
             </tr>
           `;
         }
 
-        document.getElementById('statTotalLeagues').textContent = leagues.length;
-        document.getElementById('statAvgEfficiency').textContent = validLeaguesCount > 0 ? `${(totalEff / validLeaguesCount).toFixed(1)}%` : 'N/A';
-
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">Error fetching data: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Error fetching data: ${err.message}</td></tr>`;
       }
-    });
+    }
   </script>
 </body>
 </html>
