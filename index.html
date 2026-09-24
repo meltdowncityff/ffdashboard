@@ -344,7 +344,7 @@
               team: 'PICK'
             };
             
-            marketValues[pickId] = { fc: val, sg: val, dd: val, avg: val, validSources: 1 };
+            marketValues[pickId] = { fc: val, sg: 0, dd: 0, avg: val, validSources: 1 };
           } else if (sId && marketValues[sId]) {
             marketValues[sId].fc = val;
             marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
@@ -382,9 +382,13 @@
         });
       } catch (e) { console.warn("Dynasty Dealer fetch error:", e); }
 
-      // Finalize Averages
+      // Finalize Averages (Draft picks exclusively use FantasyCalc values)
       Object.keys(marketValues).forEach(id => {
         const m = marketValues[id];
+        if (id.startsWith('pick_')) {
+          m.avg = m.fc;
+          return;
+        }
         const vals = [m.fc, m.sg, m.dd].filter(v => v > 0);
         if (vals.length > 0) {
           m.avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
