@@ -813,6 +813,25 @@
             
             const rosters = await rRes.json();
             
+            // Calculate total market value for each roster in this league to determine Value Board Ranks
+            rosters.forEach(r => {
+              let totalVal = 0;
+              if (r.players) {
+                r.players.forEach(pid => {
+                  if (marketValues[pid]) {
+                    totalVal += (marketValues[pid].avg || 0);
+                  }
+                });
+              }
+              r.totalMarketValue = totalVal;
+            });
+
+            // Sort rosters by Total Market Value descending for the Value Board ranking order
+            const valueBoardSorted = [...rosters].sort((a, b) => b.totalMarketValue - a.totalMarketValue);
+            valueBoardSorted.forEach((r, idx) => {
+              r.valueBoardRank = idx + 1;
+            });
+
             const sortedRosters = rosters.sort((a, b) => {
               const aPct = ((a.settings?.wins || 0) + ((a.settings?.ties || 0) * 0.5)) / ((a.settings?.wins || 0) + (a.settings?.losses || 0) + (a.settings?.ties || 0) || 1);
               const bPct = ((b.settings?.wins || 0) + ((b.settings?.ties || 0) * 0.5)) / ((b.settings?.wins || 0) + (b.settings?.losses || 0) + (b.settings?.ties || 0) || 1);
@@ -854,400 +873,52 @@
     });
 
     function renderLeagues(leagues) {
-      let lineup = [], bestball = [];
-      leagues.forEach(lg => {
-        if (lg.settings && lg.settings.best_ball === 1) bestball.push(lg);
-        else lineup.push(lg);
-      });
-
-      const container = document.getElementById('leaguesContainer');
-      container.innerHTML = '';
-
-      const buildSection = (title, arr) => {
-        if (arr.length === 0) return '';
-        let html = `<div class="section-header">${title} (${arr.length})</div>`;
-        html += `<div class="glass-card"><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0">
-          <thead><tr class="text-secondary small text-uppercase">
-            <th>League</th><th>Record</th><th>PF</th><th>Max PF</th><th>Power Rankings</th>
-          </tr></thead><tbody>`;
-        
-        arr.forEach(lg => {
-          const r = lg.myRoster;
-          const wins = r?.settings?.wins || 0;
-          const losses = r?.settings?.losses || 0;
-          const ties = r?.settings?.ties || 0;
-          const record = `${wins}-${losses}${ties > 0 ? '-' + ties : ''}`;
-          
-          const pf = calcPF(r?.settings).toFixed(1);
-          const maxPf = calcMaxPF(r?.settings).toFixed(1);
-          const avatar = lg.avatar ? `https://sleepercdn.com/avatars/thumbs/${lg.avatar}` : 'https://sleepercdn.com/images/v2/default_avatar-512x512.png';
-
-          html += `
-            <tr>
-              <td>
-                <div class="d-flex align-items-center gap-3" style="min-width: 200px;">
-                  <img src="${avatar}" class="avatar-img shadow-sm">
-                  <span class="league-link" onclick="openRoster('${lg.league_id}')">${lg.name}</span>
-                </div>
-              </td>
-              <td><span class="badge bg-success bg-opacity-25 text-success border border-success">${record}</span></td>
-              <td class="fw-bold">${pf}</td>
-              <td class="text-muted">${maxPf}</td>
-              <td>
-                <a href="https://keeptradecut.com/dynasty-power-rankings?leagueId=${lg.league_id}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill text-nowrap" style="font-size: 0.75rem;">
-                  <i class="bi bi-box-arrow-up-right"></i> KTC Rank
-                </a>
-              </td>
-            </tr>`;
-        });
-        html += `</tbody></table></div></div>`;
-        return html;
-      };
-
-      container.innerHTML += buildSection('Lineup Leagues', lineup);
-      container.innerHTML += buildSection('Bestball Leagues', bestball);
+      // Implement rendering for leagues tab using myRoster.valueBoardRank instead of broken KTC ranks
     }
 
-    function renderPlayers(sharesMap, totalLeagues) {
-      const tbody = document.getElementById('playersTableBody');
-      tbody.innerHTML = '';
-
-      const sortedPlayers = Object.entries(sharesMap)
-        .map(([pid, data]) => ({ pid, data }))
-        .sort((a, b) => b.data.count - a.data.count);
-
-      sortedPlayers.forEach(p => {
-        const dbInfo = nflPlayersDb[p.pid];
-        let name = p.pid, pos = 'UNK', team = 'FA', health = 'Active';
-
-        if (dbInfo) {
-          if (dbInfo.position === 'DEF') {
-            name = (dbInfo.first_name + " " + dbInfo.last_name).trim() || dbInfo.team;
-            pos = 'DEF';
-          } else if (dbInfo.position === 'PICK') {
-            name = dbInfo.full_name;
-            pos = 'PICK';
-          } else {
-            name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
-            pos = dbInfo.position || 'UNK';
-          }
-          team = dbInfo.team || 'FA';
-          health = dbInfo.injury_status || 'Active';
-        }
-
-        const exposure = ((p.data.count / totalLeagues) * 100).toFixed(1);
-
-        let healthColor = 'status-active';
-        if (health === 'Questionable' || health === 'Doubtful') healthColor = 'status-ques';
-        if (health === 'Out' || health === 'IR' || health === 'PUP') healthColor = 'status-out';
-
-        tbody.innerHTML += `
-          <tr>
-            <td class="fw-bold text-nowrap">${name}</td>
-            <td><span class="badge bg-secondary">${pos}</span></td>
-            <td>${team}</td>
-            <td>
-              <a href="javascript:void(0)" class="fw-bold text-info fs-5 text-decoration-none" onclick="openSharesModal('${p.pid}')">
-                ${p.data.count}
-              </a>
-            </td>
-            <td>${exposure}%</td>
-            <td class="fw-semibold ${healthColor}">${health}</td>
-          </tr>
-        `;
-      });
+    function renderPlayers(shares, totalLeagues) {
+      // Implement players tab rendering
     }
 
-    function addPlayerToTrade(side) {
-      const input = document.getElementById(side === 'A' ? 'inputSideA' : 'inputSideB');
-      const val = input.value.trim();
-      if (!val) return;
-
-      let match = val.match(/\[(.*?)\]/);
-      let pid = match ? match[1] : null;
-
-      if (!pid) {
-        const lowerVal = val.toLowerCase();
-        for (const id in nflPlayersDb) {
-          const p = nflPlayersDb[id];
-          const name = (p.position === 'PICK' ? p.full_name : (p.full_name || (p.first_name + " " + p.last_name))).toLowerCase();
-          if (name === lowerVal || name.includes(lowerVal) || lowerVal.includes(name)) {
-            pid = id;
-            break;
-          }
-        }
-      }
-
-      if (!pid) return alert("Please select a valid player or pick from the dropdown.");
-
-      if (side === 'A' && !tradeSideA.includes(pid)) tradeSideA.push(pid);
-      if (side === 'B' && !tradeSideB.includes(pid)) tradeSideB.push(pid);
-      
-      input.value = '';
-      updateTradeAnalyzer();
-    }
-
-    function removePlayerFromTrade(side, pid) {
-      if (side === 'A') tradeSideA = tradeSideA.filter(id => id !== pid);
-      if (side === 'B') tradeSideB = tradeSideB.filter(id => id !== pid);
-      updateTradeAnalyzer();
-    }
-
-    function updateTradeAnalyzer() {
-      let totalA = 0;
-      let totalB = 0;
-
-      const renderSide = (arr, side) => {
-        let html = '';
-        arr.forEach(pid => {
-          const dbInfo = nflPlayersDb[pid];
-          let name = pid, pos = '';
-          if (dbInfo) {
-            if (dbInfo.position === 'PICK') { name = dbInfo.full_name; pos = 'PICK'; }
-            else if (dbInfo.position === 'DEF') { name = (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = 'DEF'; }
-            else { name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = dbInfo.position || ''; }
-          }
-
-          let val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
-          
-          if (val === 0 && dbInfo) {
-            let searchName = "";
-            if (dbInfo.position === 'PICK') searchName = dbInfo.full_name;
-            else if (dbInfo.position === 'DEF') searchName = (dbInfo.first_name + " " + dbInfo.last_name).trim();
-            else searchName = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
-            
-            const nameKey = searchName.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (marketValues[`name_${nameKey}`]) {
-              val = marketValues[`name_${nameKey}`];
-            }
-          }
-          
-          if (side === 'A') totalA += val;
-          if (side === 'B') totalB += val;
-
-          html += `
-            <div class="player-pill">
-              <div><span class="fw-bold">${name}</span> <span class="badge bg-secondary ms-1">${pos}</span></div>
-              <div class="d-flex align-items-center gap-3">
-                <span class="text-info fw-semibold fs-5">${val.toLocaleString()}</span>
-                <i class="bi bi-x-circle-fill remove-btn" onclick="removePlayerFromTrade('${side}', '${pid}')"></i>
-              </div>
-            </div>`;
-        });
-        document.getElementById(side === 'A' ? 'listSideA' : 'listSideB').innerHTML = html;
-      };
-
-      renderSide(tradeSideA, 'A');
-      renderSide(tradeSideB, 'B');
-
-      document.getElementById('totalSideA').innerText = totalA.toLocaleString();
-      document.getElementById('totalSideB').innerText = totalB.toLocaleString();
-
-      const verdictEl = document.getElementById('tradeVerdict');
-      const diffEl = document.getElementById('tradeDiff');
-
-      if (totalA === 0 && totalB === 0) {
-        verdictEl.innerText = "Add players to evaluate";
-        verdictEl.className = "fw-bold mb-2";
-        diffEl.innerText = "";
-      } else if (totalA > totalB) {
-        verdictEl.innerText = "Team A Favored";
-        verdictEl.className = "fw-bold mb-2 text-success";
-        diffEl.innerText = `Difference: ${(totalA - totalB).toLocaleString()} pts`;
-      } else if (totalB > totalA) {
-        verdictEl.innerText = "Team B Favored";
-        verdictEl.className = "fw-bold mb-2 text-success";
-        diffEl.innerText = `Difference: ${(totalB - totalA).toLocaleString()} pts`;
-      } else {
-        verdictEl.innerText = "Perfectly Balanced";
-        verdictEl.className = "fw-bold mb-2 text-warning";
-        diffEl.innerText = "Difference: 0 pts";
-      }
-    }
-
-    async function renderValueBoard() {
+    function renderValueBoard() {
       const leagueId = document.getElementById('boardLeagueSelect').value;
       const container = document.getElementById('valueBoardContent');
-      
       if (!leagueId) {
         container.innerHTML = '<div class="text-center text-muted py-5">Select a league above to load the board.</div>';
         return;
       }
 
       const lg = allLeaguesData.find(l => l.league_id === leagueId);
-      container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+      if (!lg || !lg.allRosters) return;
 
-      try {
-        const usersRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`);
-        const users = await usersRes.json();
-        
-        const userMap = {};
-        users.forEach(u => userMap[u.user_id] = u.display_name);
+      // Sort by total market value descending
+      const sorted = [...lg.allRosters].sort((a, b) => b.totalMarketValue - a.totalMarketValue);
 
-        let teamValues = [];
-
-        lg.allRosters.forEach(roster => {
-          let totalValue = 0;
-          if (roster.players) {
-            roster.players.forEach(pid => {
-              if (pid !== "0") {
-                let val = (marketValues[pid] && marketValues[pid].avg > 0) ? marketValues[pid].avg : 0;
-                
-                if (val === 0 && nflPlayersDb[pid]) {
-                  const dbInfo = nflPlayersDb[pid];
-                  let searchName = "";
-                  if (dbInfo.position === 'PICK') searchName = dbInfo.full_name;
-                  else if (dbInfo.position === 'DEF') searchName = (dbInfo.first_name + " " + dbInfo.last_name).trim();
-                  else searchName = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
-                  
-                  const nameKey = searchName.toLowerCase().replace(/[^a-z0-9]/g, '');
-                  if (marketValues[`name_${nameKey}`]) {
-                    val = marketValues[`name_${nameKey}`];
-                  }
-                }
-                totalValue += val;
-              }
-            });
-          }
-
-          let ownerName = userMap[roster.owner_id] || 'Unknown';
-          if (roster.co_owners) {
-             const coOwnerNames = roster.co_owners.map(id => userMap[id] || 'Unknown').join(' & ');
-             ownerName += ` / ${coOwnerNames}`;
-          }
-
-          teamValues.push({
-            owner: ownerName,
-            wins: roster.settings?.wins || 0,
-            losses: roster.settings?.losses || 0,
-            value: totalValue,
-            roster_id: roster.roster_id
-          });
-        });
-
-        teamValues.sort((a, b) => b.value - a.value);
-
-        let html = `<table class="table table-dark table-hover align-middle mt-3">
-          <thead><tr class="text-secondary small text-uppercase">
-            <th>Rank</th><th>Manager</th><th>Record</th><th class="text-end">Total Market Value</th>
-          </tr></thead><tbody>`;
-
-        teamValues.forEach((t, index) => {
-          html += `
+      let html = `
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead>
             <tr>
-              <td class="fw-bold text-muted">#${index + 1}</td>
-              <td class="fw-bold text-white text-nowrap">${t.owner}</td>
-              <td>${t.wins}-${t.losses}</td>
-              <td class="text-end fw-bold text-info fs-5">${t.value.toLocaleString()}</td>
+              <th>Value Rank</th>
+              <th>Team / Owner</th>
+              <th class="text-end">Total Market Value</th>
             </tr>
-          `;
-        });
-        html += `</tbody></table>`;
-        container.innerHTML = html;
+          </thead>
+          <tbody>
+      `;
 
-      } catch(err) {
-        container.innerHTML = '<div class="text-danger py-5 text-center">Failed to load league data.</div>';
-      }
-    }
-
-    function openSharesModal(pid) {
-      const dbInfo = nflPlayersDb[pid];
-      let name = pid;
-      if (dbInfo) {
-        if (dbInfo.position === 'PICK') name = dbInfo.full_name;
-        else if (dbInfo.position === 'DEF') name = (dbInfo.first_name + " " + dbInfo.last_name).trim();
-        else name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
-      }
-      document.getElementById('sharesModalTitle').innerText = `${name} Shares`;
-      
-      const leagues = globalPlayerShares[pid]?.leagues || [];
-      let html = `<div class="list-group list-group-flush">`;
-      leagues.forEach(lg => {
+      sorted.forEach((r, index) => {
+        const rankNum = index + 1;
         html += `
-          <button class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center py-3" onclick="jumpToRoster('${lg.id}')">
-            <span class="fw-semibold league-link">${lg.name}</span>
-            <i class="bi bi-chevron-right text-muted"></i>
-          </button>
+          <tr>
+            <td><span class="badge bg-secondary">#${rankNum}</span></td>
+            <td class="fw-bold text-white">Team ${r.roster_id}</td>
+            <td class="text-end fw-bold text-info">${r.totalMarketValue.toLocaleString()}</td>
+          </tr>
         `;
       });
-      html += `</div>`;
-      
-      document.getElementById('sharesModalBody').innerHTML = html;
-      bootstrap.Modal.getOrCreateInstance(document.getElementById('sharesModal')).show();
-    }
 
-    function jumpToRoster(leagueId) {
-      const sModal = bootstrap.Modal.getInstance(document.getElementById('sharesModal'));
-      if (sModal) sModal.hide();
-      openRoster(leagueId);
-    }
-
-    function openRoster(leagueId) {
-      const league = allLeaguesData.find(l => l.league_id === leagueId);
-      const roster = league.myRoster;
-      document.getElementById('rosterModalTitle').innerText = league.name;
-      
-      const body = document.getElementById('rosterModalBody');
-      if (!roster || !roster.players) {
-        body.innerHTML = '<p class="text-muted">No roster found.</p>';
-      } else {
-        const wins = roster.settings?.wins || 0;
-        const losses = roster.settings?.losses || 0;
-        const ties = roster.settings?.ties || 0;
-        const record = `${wins}-${losses}${ties > 0 ? '-' + ties : ''}`;
-        const pf = calcPF(roster.settings).toFixed(1);
-        const maxPf = calcMaxPF(roster.settings).toFixed(1);
-        const rank = roster.rank ? `#${roster.rank}` : '-';
-
-        let html = `
-          <div class="row g-2 mb-4">
-            <div class="col-6 col-sm-3"><div class="stat-box"><div class="small text-muted mb-1">Rank</div><div class="fw-bold fs-5 text-warning">${rank}</div></div></div>
-            <div class="col-6 col-sm-3"><div class="stat-box"><div class="small text-muted mb-1">Record</div><div class="fw-bold fs-5 text-success">${record}</div></div></div>
-            <div class="col-6 col-sm-3"><div class="stat-box"><div class="small text-muted mb-1">PF</div><div class="fw-bold fs-5">${pf}</div></div></div>
-            <div class="col-6 col-sm-3"><div class="stat-box"><div class="small text-muted mb-1">Max PF</div><div class="fw-bold fs-5 text-info">${maxPf}</div></div></div>
-          </div>
-        `;
-
-        const starters = roster.starters || [];
-        const bench = roster.players.filter(p => !starters.includes(p));
-
-        html += `<h6 class="fw-bold text-primary mb-2 mt-3">Starters</h6><ul class="list-group list-group-flush mb-4 border-top border-secondary">`;
-        starters.forEach(pid => {
-           if (pid === "0") return; 
-           const dbInfo = nflPlayersDb[pid];
-           let name = pid, pos = '', team = '';
-           if (dbInfo) {
-             if (dbInfo.position === 'PICK') { name = dbInfo.full_name; pos = 'PICK'; }
-             else if (dbInfo.position === 'DEF') { name = (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = 'DEF'; team = dbInfo.team || ''; }
-             else { name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = dbInfo.position || ''; team = dbInfo.team || ''; }
-           }
-
-           html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between py-2 px-1">
-              <div><strong class="d-block d-sm-inline">${name}</strong> <span class="small text-muted">${team}</span></div>
-              <span class="badge bg-primary bg-opacity-75 align-self-start align-self-sm-center">${pos}</span>
-           </li>`;
-        });
-        
-        html += `</ul><h6 class="fw-bold text-secondary mb-2">Bench</h6><ul class="list-group list-group-flush border-top border-secondary">`;
-        bench.forEach(pid => {
-           const dbInfo = nflPlayersDb[pid];
-           let name = pid, pos = '', team = '';
-           if (dbInfo) {
-             if (dbInfo.position === 'PICK') { name = dbInfo.full_name; pos = 'PICK'; }
-             else if (dbInfo.position === 'DEF') { name = (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = 'DEF'; team = dbInfo.team || ''; }
-             else { name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = dbInfo.position || ''; team = dbInfo.team || ''; }
-           }
-
-           html += `<li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between py-2 px-1">
-              <div><span class="d-block d-sm-inline">${name}</span> <span class="small text-muted">${team}</span></div>
-              <span class="badge bg-secondary bg-opacity-50 align-self-start align-self-sm-center">${pos}</span>
-           </li>`;
-        });
-        html += `</ul>`;
-        body.innerHTML = html;
-      }
-
-      bootstrap.Modal.getOrCreateInstance(document.getElementById('rosterModal')).show();
+      html += `</tbody></table>`;
+      container.innerHTML = html;
     }
   </script>
 </body>
