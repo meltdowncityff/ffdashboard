@@ -8,55 +8,121 @@
   <!-- Bootstrap & Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-card: rgba(15, 23, 42, 0.72);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.14);
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-glow: rgba(99, 102, 241, 0.45);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #0b0f19 !important;
-      /* Creates a subtle, high-tech grid pattern background */
+      background-color: var(--bg-deep) !important;
       background-image: 
-        linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px) !important;
-      background-size: 40px 40px !important;
-      font-family: 'Inter', sans-serif;
+        radial-gradient(ellipse 120% 80% at 50% -20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+        linear-gradient(rgba(56, 189, 248, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.025) 1px, transparent 1px) !important;
+      background-size: 100% 100%, 48px 48px, 48px 48px !important;
+      font-family: 'Inter', system-ui, sans-serif;
       color: #e2e8f0;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       margin: 0;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Elegant Hero Header */
+    /* ===== Hero Header ===== */
     .hero-header {
-      padding: 2.5rem 1rem;
+      padding: 3rem 1rem 2.75rem;
       text-align: center;
-      background: rgba(0, 0, 0, 0.25);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      margin-bottom: 2rem;
+      background: rgba(0, 0, 0, 0.35);
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center top, rgba(99, 102, 241, 0.08), transparent 70%);
+      pointer-events: none;
     }
 
     .hero-title {
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
       font-weight: 800;
-      font-size: 2.5rem;
-      color: #fff;
-      letter-spacing: -1px;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      font-size: clamp(2rem, 5vw, 3.1rem);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 45%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.35rem;
     }
 
-    /* Glassmorphism Cards */
-    .glass-card {
-      background: rgba(26, 29, 45, 0.65);
+    .hero-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.15rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    /* Controls container */
+    .hero-controls {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 0.6rem 0.75rem;
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
     }
 
-    /* Mobile Responsive Tables */
+    /* ===== Glass Cards ===== */
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .glass-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    /* ===== Tables ===== */
     .table-responsive {
       width: 100%;
       overflow-x: auto;
@@ -67,125 +133,319 @@
       margin-bottom: 0;
       background: transparent !important;
     }
+
     .table-dark {
       --bs-table-bg: transparent;
-      --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
-      --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+      --bs-table-striped-bg: rgba(255, 255, 255, 0.015);
+      --bs-table-hover-bg: rgba(255, 255, 255, 0.04);
+      --bs-table-color: #e2e8f0;
+    }
+
+    .table thead th {
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      color: var(--text-secondary) !important;
+      border-bottom: 1px solid var(--border-subtle) !important;
+      padding-top: 1rem;
+      padding-bottom: 0.85rem;
+    }
+
+    .table tbody td {
+      padding-top: 0.95rem;
+      padding-bottom: 0.95rem;
+      border-color: rgba(255, 255, 255, 0.04) !important;
+      vertical-align: middle;
     }
 
     .league-link {
-      color: #38bdf8;
+      color: #7dd3fc;
       cursor: pointer;
       font-weight: 600;
       text-decoration: none;
-      transition: color 0.2s;
+      transition: color 0.2s ease;
     }
-    .league-link:hover { color: #7dd3fc; }
+    .league-link:hover { 
+      color: #bae6fd; 
+    }
     
     .section-header {
-      border-bottom: 2px solid rgba(255,255,255,0.1);
-      padding-bottom: 8px;
-      margin-top: 32px;
-      margin-bottom: 16px;
-      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 0.75rem;
+      margin-top: 2.5rem;
+      margin-bottom: 1.25rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.15rem;
       font-weight: 700;
-      color: #f8fafc;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .section-header::before {
+      content: '';
+      width: 4px;
+      height: 1.15em;
+      background: linear-gradient(180deg, var(--accent), #818cf8);
+      border-radius: 4px;
     }
 
     .avatar-img {
-      width: 40px; height: 40px;
-      border-radius: 50%; object-fit: cover;
-      border: 2px solid rgba(255,255,255,0.1);
+      width: 42px; 
+      height: 42px;
+      border-radius: 12px; 
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
-    .status-active { color: #4ade80; }
-    .status-ques { color: #facc15; }
-    .status-out { color: #f87171; }
+    .status-active { color: var(--success); }
+    .status-ques { color: var(--warning); }
+    .status-out { color: var(--danger); }
     
-    /* Modern Tabs */
+    /* ===== Modern Tabs ===== */
     .custom-tabs-container {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 2.25rem;
       justify-content: center;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 0.4rem;
+      width: fit-content;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      backdrop-filter: blur(12px);
     }
+
     .custom-tab {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #cbd5e1;
-      padding: 10px 20px;
-      border-radius: 30px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.65rem 1.35rem;
+      border-radius: 999px;
       font-weight: 600;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(4px);
+      font-size: 0.925rem;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
     }
+
     .custom-tab:hover {
-      background: rgba(255, 255, 255, 0.1);
       color: #fff;
+      background: rgba(255, 255, 255, 0.06);
     }
+
     .custom-tab.active {
-      background: #6366f1;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
       color: white;
-      border-color: #6366f1;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 4px 18px var(--accent-glow);
     }
-    .tab-content { display: none; animation: fadeIn 0.4s ease; }
-    .tab-content.active { display: block; }
+
+    .tab-content { 
+      display: none; 
+      animation: fadeIn 0.4s ease; 
+    }
+    .tab-content.active { 
+      display: block; 
+    }
     
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
     
     .stat-box {
       background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 1rem 0.75rem;
       text-align: center;
+      transition: background 0.2s ease;
+    }
+
+    .stat-box:hover {
+      background: rgba(255, 255, 255, 0.05);
     }
     
-    /* Trade Analyzer Styling */
+    /* ===== Trade Analyzer ===== */
     .trade-side { 
-      min-height: 250px; 
-      background: rgba(0,0,0,0.3); 
-      border-radius: 12px; 
-      padding: 1rem; 
-      border: 1px solid rgba(255,255,255,0.05);
+      min-height: 260px; 
+      background: rgba(0, 0, 0, 0.35); 
+      border-radius: var(--radius-md); 
+      padding: 1.1rem; 
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
+
     .player-pill { 
-      background: rgba(255,255,255,0.08); 
-      padding: 10px 14px; 
-      border-radius: 8px; 
-      margin-bottom: 8px; 
+      background: rgba(255, 255, 255, 0.05); 
+      padding: 0.85rem 1rem; 
+      border-radius: var(--radius-sm); 
+      margin-bottom: 0.6rem; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s ease, border-color 0.2s ease;
     }
-    .remove-btn { cursor: pointer; color: #f87171; transition: color 0.2s; font-size: 1.1rem; }
-    .remove-btn:hover { color: #fca5a5; }
 
+    .player-pill:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .remove-btn { 
+      cursor: pointer; 
+      color: #f87171; 
+      transition: color 0.2s, transform 0.15s; 
+      font-size: 1.15rem; 
+    }
+    .remove-btn:hover { 
+      color: #fca5a5; 
+      transform: scale(1.1);
+    }
+
+    /* ===== Footer ===== */
     footer {
       margin-top: auto;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      padding: 2rem 0;
+      border-top: 1px solid var(--border-subtle);
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(16px);
+      padding: 2.25rem 0;
     }
-    .hover-white:hover { color: #fff !important; }
 
-    /* Custom Input Controls */
-    .glass-input {
-      background: rgba(0, 0, 0, 0.4) !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      color: #fff !important;
+    .hover-white:hover { 
+      color: #fff !important; 
     }
+
+    /* ===== Form Controls ===== */
+    .glass-input {
+      background: rgba(0, 0, 0, 0.45) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #fff !important;
+      border-radius: 999px !important;
+      padding: 0.55rem 1.1rem !important;
+      font-weight: 500;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
     .glass-input:focus {
       background: rgba(0, 0, 0, 0.6) !important;
-      border-color: #6366f1 !important;
-      box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25) !important;
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+      outline: none;
+    }
+
+    .glass-input::placeholder {
+      color: #64748b;
+    }
+
+    /* Primary Button */
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+      border: none !important;
+      color: white !important;
+      font-weight: 600;
+      border-radius: 999px !important;
+      padding: 0.55rem 1.5rem !important;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(99, 102, 241, 0.55) !important;
+      background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Outline info button (KTC) */
+    .btn-outline-info {
+      border-radius: 999px !important;
+      font-weight: 600;
+      border-width: 1.5px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline-info:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+    }
+
+    /* Badges */
+    .badge {
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* Record badge */
+    .badge.bg-success {
+      background: rgba(52, 211, 153, 0.15) !important;
+      color: #34d399 !important;
+      border: 1px solid rgba(52, 211, 153, 0.3) !important;
+    }
+
+    /* Modal refinements */
+    .modal-content {
+      border-radius: 20px !important;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    /* Loading */
+    .spinner-border {
+      width: 3.25rem;
+      height: 3.25rem;
+      border-width: 0.25em;
+    }
+
+    /* Utility */
+    .text-info {
+      color: #7dd3fc !important;
+    }
+
+    /* Empty state icon */
+    .empty-state i {
+      opacity: 0.4;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .hero-header {
+        padding: 2.25rem 1rem 2rem;
+      }
+      .hero-controls {
+        border-radius: 16px;
+        padding: 0.75rem;
+        width: 100%;
+        max-width: 360px;
+      }
+      .custom-tabs-container {
+        border-radius: 16px;
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+      .custom-tab {
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
     }
   </style>
 </head>
@@ -193,22 +453,23 @@
 
 <!-- Hero Header -->
   <div class="hero-header">
-    <div class="container-fluid px-4">
-      <!-- Updated Title -->
-      <h1 class="hero-title mb-1"><i class="bi bi-trophy-fill text-warning me-2"></i>FFAddict Dynasty War Room</h1>
-      <!-- Missing Subtitle Added Here -->
-      <p class="text-light opacity-75 mb-4 fs-5">Your Ultimate Dynasty Football Command Center</p>
+    <div class="container-fluid px-4 position-relative">
+      <h1 class="hero-title mb-2">
+        <i class="bi bi-trophy-fill text-warning me-2" style="-webkit-text-fill-color: #fbbf24;"></i>
+        FFAddict Dynasty War Room
+      </h1>
+      <p class="hero-subtitle mb-4">Your Ultimate Dynasty Football Command Center</p>
       
-      <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center">
-        <input type="text" id="usernameInput" class="form-control glass-input" placeholder="Sleeper Username" style="max-width: 200px;">
-        <select id="seasonSelect" class="form-select glass-input" style="max-width: 100px;"></select>
-        <button id="fetchBtn" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm">Load Data</button>
+      <div class="hero-controls">
+        <input type="text" id="usernameInput" class="form-control glass-input" placeholder="Sleeper Username" style="max-width: 200px; min-width: 160px;">
+        <select id="seasonSelect" class="form-select glass-input" style="max-width: 110px;"></select>
+        <button id="fetchBtn" class="btn btn-primary fw-bold px-4">Load Data</button>
       </div>
     </div>
   </div>
 
   <!-- Main Area -->
-  <div class="container-fluid px-4 px-md-5 mb-5">
+  <div class="container-fluid px-4 px-md-5 mb-5" style="max-width: 1440px; margin-left: auto; margin-right: auto;">
     
     <!-- Tab Controls -->
     <div class="custom-tabs-container">
@@ -220,15 +481,15 @@
 
     <!-- Loading State -->
     <div id="loadingIndicator" class="text-center py-5 d-none">
-      <div class="spinner-border text-primary shadow-sm" role="status" style="width: 3rem; height: 3rem;"></div>
+      <div class="spinner-border text-primary shadow-sm" role="status"></div>
       <div id="loadingText" class="mt-3 text-light fw-semibold fs-5">Fetching Data...</div>
     </div>
 
     <!-- TAB 1: Leagues -->
     <div id="leaguesTab" class="tab-content active">
       <div id="leaguesContainer">
-        <div class="glass-card text-center text-muted py-5">
-          <i class="bi bi-search fs-1 mb-3 d-block opacity-50"></i>
+        <div class="glass-card text-center text-muted py-5 empty-state">
+          <i class="bi bi-search fs-1 mb-3 d-block"></i>
           Enter your username and click Load Data.
         </div>
       </div>
@@ -236,7 +497,7 @@
 
     <!-- TAB 2: Players -->
     <div id="playersTab" class="tab-content">
-      <div class="glass-card p-3">
+      <div class="glass-card p-3 p-md-4">
         <div class="table-responsive">
           <table class="table table-dark table-hover align-middle mb-0">
             <thead>
@@ -259,11 +520,11 @@
 
     <!-- TAB 3: Trade Analyzer -->
     <div id="analyzerTab" class="tab-content">
-      <div class="glass-card p-4">
+      <div class="glass-card p-4 p-md-5">
         <div class="row text-center mb-4">
           <div class="col-12">
-            <h4 class="fw-bold text-white mb-2">Dynasty Trade Analyzer</h4>
-            <p class="text-muted small">Values powered by FantasyCalc (Superflex / 12-Team / 1 PPR / TEP+)</p>
+            <h4 class="fw-bold text-white mb-2" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.02em;">Dynasty Trade Analyzer</h4>
+            <p class="text-muted small mb-0">Values powered by FantasyCalc (Superflex / 12-Team / 1 PPR / TEP+)</p>
           </div>
         </div>
         
@@ -277,7 +538,7 @@
               <button class="btn btn-primary" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side shadow-sm" id="listSideA"></div>
-            <div class="mt-3 d-flex justify-content-between align-items-center bg-black bg-opacity-25 p-3 rounded">
+            <div class="mt-3 d-flex justify-content-between align-items-center bg-black bg-opacity-25 p-3 rounded-3">
               <span class="fs-5 fw-bold text-secondary">Team A Total</span>
               <span class="fs-3 fw-bold text-white" id="totalSideA">0</span>
             </div>
@@ -290,26 +551,26 @@
               <button class="btn btn-primary" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side shadow-sm" id="listSideB"></div>
-            <div class="mt-3 d-flex justify-content-between align-items-center bg-black bg-opacity-25 p-3 rounded">
+            <div class="mt-3 d-flex justify-content-between align-items-center bg-black bg-opacity-25 p-3 rounded-3">
               <span class="fs-5 fw-bold text-secondary">Team B Total</span>
               <span class="fs-3 fw-bold text-white" id="totalSideB">0</span>
             </div>
           </div>
         </div>
 
-        <div class="text-center mt-5 pt-4 border-top border-secondary">
-          <h3 class="fw-bold mb-2" id="tradeVerdict">Add players to evaluate</h3>
-          <p class="text-muted fs-5" id="tradeDiff"></p>
+        <div class="text-center mt-5 pt-4 border-top border-secondary border-opacity-25">
+          <h3 class="fw-bold mb-2" id="tradeVerdict" style="font-family: 'Plus Jakarta Sans', sans-serif;">Add players to evaluate</h3>
+          <p class="text-muted fs-5 mb-0" id="tradeDiff"></p>
         </div>
       </div>
     </div>
 
     <!-- TAB 4: League Value Board -->
     <div id="valueBoardTab" class="tab-content">
-      <div class="glass-card p-4">
+      <div class="glass-card p-4 p-md-5">
         <div class="row align-items-center mb-4 g-3">
           <div class="col-md-8">
-            <h4 class="fw-bold text-white mb-2">League Value Board</h4>
+            <h4 class="fw-bold text-white mb-2" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.02em;">League Value Board</h4>
             <p class="text-muted small mb-0">Total roster values aggregated from FantasyCalc, Stats Guy, & Dynasty Dealer.</p>
           </div>
           <div class="col-md-4 text-md-end">
@@ -332,9 +593,15 @@
     <div class="container text-center">
       <div class="small text-muted mb-3">Market values supplied by public APIs. For entertainment purposes.</div>
       <div class="d-flex flex-wrap justify-content-center gap-4">
-        <a href="https://fantasycalc.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-calculator"></i> FantasyCalc</a>
-        <a href="https://statsguyfantasy.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-bar-chart"></i> Stats Guy</a>
-        <a href="https://dynastydealer.com" target="_blank" class="text-secondary text-decoration-none hover-white"><i class="bi bi-tags"></i> Dynasty Dealer</a>
+        <a href="https://fantasycalc.com" target="_blank" class="text-secondary text-decoration-none hover-white">
+          <i class="bi bi-calculator me-1"></i> FantasyCalc
+        </a>
+        <a href="https://statsguyfantasy.com" target="_blank" class="text-secondary text-decoration-none hover-white">
+          <i class="bi bi-bar-chart me-1"></i> Stats Guy
+        </a>
+        <a href="https://dynastydealer.com" target="_blank" class="text-secondary text-decoration-none hover-white">
+          <i class="bi bi-tags me-1"></i> Dynasty Dealer
+        </a>
       </div>
     </div>
   </footer>
@@ -342,9 +609,9 @@
   <!-- Roster Modal -->
   <div class="modal fade" id="rosterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
-      <div class="modal-content text-white" style="background: rgba(26, 29, 45, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
-        <div class="modal-header border-bottom border-secondary">
-          <h5 class="modal-title fw-bold" id="rosterModalTitle">Team Roster</h5>
+      <div class="modal-content text-white" style="background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
+        <div class="modal-header border-bottom border-secondary border-opacity-25">
+          <h5 class="modal-title fw-bold" id="rosterModalTitle" style="font-family: 'Plus Jakarta Sans', sans-serif;">Team Roster</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body" id="rosterModalBody"></div>
@@ -355,9 +622,9 @@
   <!-- Player Shares Modal -->
   <div class="modal fade" id="sharesModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content text-white" style="background: rgba(26, 29, 45, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
-        <div class="modal-header border-bottom border-secondary">
-          <h5 class="modal-title fw-bold" id="sharesModalTitle">Leagues Owned</h5>
+      <div class="modal-content text-white" style="background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
+        <div class="modal-header border-bottom border-secondary border-opacity-25">
+          <h5 class="modal-title fw-bold" id="sharesModalTitle" style="font-family: 'Plus Jakarta Sans', sans-serif;">Leagues Owned</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-0" id="sharesModalBody"></div>
