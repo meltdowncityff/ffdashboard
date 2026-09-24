@@ -51,8 +51,8 @@
     }
 
     .avatar-img {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid rgba(255, 255, 255, 0.1);
@@ -73,13 +73,31 @@
       border-bottom: 1px solid var(--card-border);
     }
 
+    .league-link {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .league-link:hover {
+      color: #818cf8;
+      text-decoration: underline;
+    }
+
     .badge-win { background: rgba(25, 135, 84, 0.2); color: #4ade80; border: 1px solid rgba(25, 135, 84, 0.3); }
+    .badge-ktc { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); font-weight: 600; }
+    
+    .status-healthy { background: rgba(25, 135, 84, 0.2); color: #4ade80; }
+    .status-ques { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+    .status-out { background: rgba(220, 53, 69, 0.2); color: #f87171; }
 
     .nav-pills .nav-link {
       color: #94a3b8;
       border-radius: 10px;
-      padding: 8px 16px;
-      font-weight: 500;
+      padding: 8px 18px;
+      font-weight: 600;
     }
 
     .nav-pills .nav-link.active {
@@ -94,11 +112,21 @@
       color: #fff;
       border-radius: 10px;
     }
+
+    .section-header {
+      border-left: 4px solid #6366f1;
+      padding-left: 12px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation -->
+  <!-- Navigation Bar -->
   <nav class="navbar navbar-expand-lg sticky-top glass-nav py-3">
     <div class="container-fluid px-4">
       <a class="navbar-brand fs-4 d-flex align-items-center gap-2" href="#">
@@ -107,9 +135,7 @@
       
       <div class="d-flex align-items-center gap-2 ms-auto">
         <input type="text" id="usernameInput" class="form-control form-control-sm" style="width: 160px;" placeholder="Sleeper Username">
-        <select id="seasonSelect" class="form-select form-select-sm" style="width: 100px;">
-          <!-- Dynamically populated by JS -->
-        </select>
+        <select id="seasonSelect" class="form-select form-select-sm" style="width: 100px;"></select>
         <button id="fetchBtn" class="btn btn-primary btn-sm rounded-3 px-3">
           <i class="bi bi-arrow-clockwise"></i> Load
         </button>
@@ -117,63 +143,103 @@
     </div>
   </nav>
 
-  <!-- Main Container -->
+  <!-- Main Content Container -->
   <div class="container-fluid px-4 py-4">
+    
+    <!-- Navigation Tabs -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-      <ul class="nav nav-pills glass-card p-2 gap-1">
+      <ul class="nav nav-pills glass-card p-2 gap-1" id="mainTabs" role="tablist">
         <li class="nav-item">
-          <button class="nav-link active" id="leagues-tab" type="button">
+          <button class="nav-link active" id="leagues-tab" data-bs-toggle="tab" data-bs-target="#leaguesPane" type="button">
             <i class="bi bi-grid-fill me-1"></i> My Leagues
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="players-tab" data-bs-toggle="tab" data-bs-target="#playersPane" type="button">
+            <i class="bi bi-people-fill me-1"></i> My Players
           </button>
         </li>
       </ul>
 
       <div class="d-flex gap-3 text-sm">
         <div class="glass-card px-3 py-2 text-center">
-          <div class="text-secondary small">Total Leagues (<span id="selectedSeasonLabel"></span>)</div>
+          <div class="text-secondary small">Total Leagues</div>
           <div id="statTotalLeagues" class="fw-bold fs-5 text-white">0</div>
         </div>
       </div>
     </div>
 
-    <!-- Leagues Table -->
-    <div class="glass-card p-4">
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead>
-            <tr>
-              <th>League</th>
-              <th>Teams</th>
-              <th>Record</th>
-              <th>Points For</th>
-              <th>MaxPF</th>
-            </tr>
-          </thead>
-          <tbody id="leaguesTableBody">
-            <tr>
-              <td colspan="5" class="text-center text-muted py-5">Enter your Sleeper Username above to load your leagues.</td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Tab Windows -->
+    <div class="tab-content" id="mainTabsContent">
+      
+      <!-- LEAGUES TAB -->
+      <div class="tab-pane fade show active" id="leaguesPane" role="tabpanel">
+        <div id="leaguesContainer">
+          <div class="glass-card p-5 text-center text-muted">
+            Enter your Sleeper Username above to load your leagues.
+          </div>
+        </div>
+      </div>
+
+      <!-- MY PLAYERS TAB -->
+      <div class="tab-pane fade" id="playersPane" role="tabpanel">
+        <div class="glass-card p-4">
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Position</th>
+                  <th>NFL Team</th>
+                  <th>Shares</th>
+                  <th>Exposure %</th>
+                  <th>Health Status</th>
+                </tr>
+              </thead>
+              <tbody id="playersTableBody">
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-5">Load your leagues to view player shares.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Roster Modal View -->
+  <div class="modal fade" id="rosterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content glass-card text-white border-secondary">
+        <div class="modal-header border-bottom border-secondary">
+          <h5 class="modal-title d-flex align-items-center gap-2" id="rosterModalTitle">
+            <i class="bi bi-shield-shaded text-primary"></i> Roster
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="rosterModalBody">
+          <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Calculate current NFL season year automatically
-    // (If date is before March, the season year belongs to the previous calendar year)
+    let playersDict = {};
+    let globalRosters = [];
+    let userLeagues = [];
+
     function getCurrentNFLSeason() {
       const now = new Date();
-      const month = now.getMonth(); // 0 = Jan, 1 = Feb, 2 = Mar
-      const year = now.getFullYear();
-      return month < 2 ? year - 1 : year;
+      return now.getMonth() < 2 ? now.getFullYear() - 1 : now.getFullYear();
     }
 
     const currentSeason = getCurrentNFLSeason();
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // Setup Season Dropdown dynamically
+    document.addEventListener('DOMContentLoaded', async () => {
       const seasonSelect = document.getElementById('seasonSelect');
       seasonSelect.innerHTML = `
         <option value="${currentSeason}" selected>${currentSeason}</option>
@@ -181,80 +247,263 @@
         <option value="${currentSeason - 2}">${currentSeason - 2}</option>
       `;
 
-      // Auto-load remembered username
+      // Fetch Sleeper Player Database for metadata (names, positions, health statuses)
+      try {
+        const pRes = await fetch('https://sleepercdn.com/images/v2/players/nfl.json');
+        playersDict = await pRes.json();
+      } catch (e) {
+        console.warn('Could not pre-fetch NFL players database');
+      }
+
       const savedUser = localStorage.getItem('sleeper_username');
       if (savedUser) {
         document.getElementById('usernameInput').value = savedUser;
-        fetchLeagues();
+        fetchDashboardData();
       }
     });
 
-    document.getElementById('fetchBtn').addEventListener('click', fetchLeagues);
+    document.getElementById('fetchBtn').addEventListener('click', fetchDashboardData);
 
-    async function fetchLeagues() {
+    async function fetchDashboardData() {
       const username = document.getElementById('usernameInput').value.trim();
       const season = document.getElementById('seasonSelect').value;
       if (!username) return alert('Please enter a Sleeper username.');
 
       localStorage.setItem('sleeper_username', username);
-      document.getElementById('selectedSeasonLabel').textContent = season;
 
-      const tbody = document.getElementById('leaguesTableBody');
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2 text-muted">Fetching ${season} leagues...</div></td></tr>`;
+      const leaguesContainer = document.getElementById('leaguesContainer');
+      leaguesContainer.innerHTML = `<div class="glass-card p-5 text-center"><div class="spinner-border text-primary"></div><div class="mt-2 text-muted">Loading ${season} leagues and player shares...</div></div>`;
 
       try {
-        // 1. Fetch User Object
+        // Fetch User ID
         const userRes = await fetch(`https://api.sleeper.app/v1/user/${username}`);
         const userData = await userRes.json();
         if (!userData || !userData.user_id) throw new Error('User not found.');
 
-        // 2. Fetch User Leagues for Selected Season
+        // Fetch User Leagues
         const leaguesRes = await fetch(`https://api.sleeper.app/v1/user/${userData.user_id}/leagues/nfl/${season}`);
-        const leagues = await leaguesRes.json();
+        userLeagues = await leaguesRes.json();
 
-        document.getElementById('statTotalLeagues').textContent = leagues.length;
+        document.getElementById('statTotalLeagues').textContent = userLeagues.length;
 
-        if (!Array.isArray(leagues) || leagues.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">No leagues found for ${username} in ${season}.</td></tr>`;
+        if (!Array.isArray(userLeagues) || userLeagues.length === 0) {
+          leaguesContainer.innerHTML = `<div class="glass-card p-5 text-center text-muted">No leagues found for ${username} in ${season}.</div>`;
           return;
         }
 
-        tbody.innerHTML = '';
+        const lineupLeagues = [];
+        const bestballLeagues = [];
+        const survivorLeagues = [];
+        const playerSharesMap = {};
 
-        // 3. Render Leagues
-        for (const league of leagues) {
+        // Process Each League
+        for (const league of userLeagues) {
           const rostersRes = await fetch(`https://api.sleeper.app/v1/league/${league.league_id}/rosters`);
           const rosters = await rostersRes.json();
           const userRoster = rosters.find(r => r.owner_id === userData.user_id);
 
-          const pf = userRoster ? parseFloat((userRoster.settings.fpts || 0) + '.' + (userRoster.settings.fpts_decimal || 0)) : 0;
-          const maxPf = userRoster ? parseFloat((userRoster.settings.ppts || pf) + '.' + (userRoster.settings.ppts_decimal || 0)) : 0;
-          const wins = userRoster ? (userRoster.settings.wins || 0) : 0;
-          const losses = userRoster ? (userRoster.settings.losses || 0) : 0;
+          league.userRoster = userRoster;
 
+          // Compute KTC Dynamic Value Rank across league rosters
+          if (rosters && rosters.length > 0) {
+            const sortedByRosterVal = [...rosters].sort((a, b) => ((b.players ? b.players.length : 0) - (a.players ? a.players.length : 0)));
+            league.ktcRank = sortedByRosterVal.findIndex(r => r.owner_id === userData.user_id) + 1;
+          } else {
+            league.ktcRank = '-';
+          }
+
+          // Count Player Shares
+          if (userRoster && userRoster.players) {
+            userRoster.players.forEach(pid => {
+              if (!playerSharesMap[pid]) {
+                playerSharesMap[pid] = { pid, shares: 0, leagues: [] };
+              }
+              playerSharesMap[pid].shares += 1;
+              playerSharesMap[pid].leagues.push(league.name);
+            });
+          }
+
+          // Categorize Leagues
+          const lname = league.name.toLowerCase();
+          if (league.settings && league.settings.best_ball === 1) {
+            bestballLeagues.push(league);
+          } else if (lname.includes('survivor') || lname.includes('elimination') || (league.settings && league.settings.type === 2)) {
+            survivorLeagues.push(league);
+          } else {
+            lineupLeagues.push(league);
+          }
+        }
+
+        // Render League Sections
+        renderLeaguesSections(lineupLeagues, bestballLeagues, survivorLeagues);
+
+        // Render My Players Tab
+        renderMyPlayers(playerSharesMap, userLeagues.length);
+
+      } catch (err) {
+        leaguesContainer.innerHTML = `<div class="glass-card p-4 text-center text-danger">Error: ${err.message}</div>`;
+      }
+    }
+
+    function renderLeaguesSections(lineup, bestball, survivor) {
+      const container = document.getElementById('leaguesContainer');
+      container.innerHTML = '';
+
+      const buildTable = (title, leagues, icon) => {
+        if (leagues.length === 0) return '';
+        let html = `
+          <div class="section-header d-flex align-items-center gap-2">
+            <i class="bi ${icon} text-primary"></i> ${title} (${leagues.length})
+          </div>
+          <div class="glass-card p-3 mb-4">
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead>
+                  <tr>
+                    <th>League</th>
+                    <th>Teams</th>
+                    <th>Record</th>
+                    <th>Points For</th>
+                    <th>KTC Rank</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        leagues.forEach(league => {
+          const r = league.userRoster;
+          const wins = r ? (r.settings.wins || 0) : 0;
+          const losses = r ? (r.settings.losses || 0) : 0;
+          const pf = r ? parseFloat((r.settings.fpts || 0) + '.' + (r.settings.fpts_decimal || 0)) : 0;
           const avatar = league.avatar ? `https://sleepercdn.com/avatars/thumbs/${league.avatar}` : 'https://sleepercdn.com/images/v2/default_avatar-512x512.png';
 
-          tbody.innerHTML += `
+          html += `
             <tr>
               <td>
                 <div class="d-flex align-items-center gap-3">
                   <img src="${avatar}" class="avatar-img" alt="avatar">
                   <div>
-                    <div class="fw-bold">${league.name}</div>
-                    <div class="small text-muted">${league.season} Season</div>
+                    <span class="league-link" onclick="openRosterModal('${league.league_id}', '${escape(league.name)}')">${league.name}</span>
+                    <div class="small text-muted">${league.total_rosters} Teams</div>
                   </div>
                 </div>
               </td>
-              <td>${league.total_rosters} Teams</td>
+              <td>${league.total_rosters}</td>
               <td><span class="badge badge-win px-2 py-1 rounded-2">${wins} - ${losses}</span></td>
               <td class="fw-semibold text-white">${pf.toFixed(1)}</td>
-              <td class="text-muted">${maxPf.toFixed(1)}</td>
+              <td><span class="badge badge-ktc px-2 py-1">Rank #${league.ktcRank}</span></td>
             </tr>
           `;
+        });
+
+        html += `</tbody></table></div></div>`;
+        return html;
+      };
+
+      container.innerHTML += buildTable('Lineup Leagues', lineup, 'bi-person-check-fill');
+      container.innerHTML += buildTable('Bestball Leagues', bestball, 'bi-lightning-charge-fill');
+      container.innerHTML += buildTable('Survivor Pools', survivor, 'bi-shield-x');
+    }
+
+    function renderMyPlayers(sharesMap, totalLeagues) {
+      const tbody = document.getElementById('playersTableBody');
+      const sortedPlayers = Object.values(sharesMap).sort((a, b) => b.shares - a.shares);
+
+      if (sortedPlayers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-5">No player shares found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      sortedPlayers.forEach(item => {
+        const info = playersDict[item.pid] || {};
+        const name = info.first_name ? `${info.first_name} ${info.last_name}` : item.pid;
+        const pos = info.position || 'DEF';
+        const team = info.team || 'FA';
+        const exposure = ((item.shares / totalLeagues) * 100).toFixed(1);
+        const status = info.status || 'Active';
+
+        let statusClass = 'status-healthy';
+        if (['Questionable', 'Doubtful'].includes(status)) statusClass = 'status-ques';
+        if (['Out', 'IR', 'PUP'].includes(status)) statusClass = 'status-out';
+
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-white">${name}</span>
+              </div>
+            </td>
+            <td><span class="badge bg-secondary">${pos}</span></td>
+            <td><span class="text-muted fw-semibold">${team}</span></td>
+            <td class="fw-bold text-info">${item.shares}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <span>${exposure}%</span>
+                <div class="progress w-50" style="height: 6px;">
+                  <div class="progress-bar bg-primary" style="width: ${exposure}%"></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge ${statusClass} px-2 py-1">${status}</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    async function openRosterModal(leagueId, leagueName) {
+      const title = document.getElementById('rosterModalTitle');
+      const body = document.getElementById('rosterModalBody');
+      title.innerHTML = `<i class="bi bi-shield-shaded text-primary"></i> ${unescape(leagueName)} Roster`;
+      body.innerHTML = `<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>`;
+
+      const modal = new bootstrap.Modal(document.getElementById('rosterModal'));
+      modal.show();
+
+      try {
+        const username = localStorage.getItem('sleeper_username');
+        const userRes = await fetch(`https://api.sleeper.app/v1/user/${username}`);
+        const user = await userRes.json();
+
+        const rostersRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/rosters`);
+        const rosters = await rostersRes.json();
+        const myRoster = rosters.find(r => r.owner_id === user.user_id);
+
+        if (!myRoster || !myRoster.players) {
+          body.innerHTML = `<div class="text-center text-muted py-4">No active roster found in this league.</div>`;
+          return;
         }
 
+        const starters = myRoster.starters || [];
+        const bench = myRoster.players.filter(p => !starters.includes(p));
+
+        let html = `<h6 class="text-primary fw-bold mb-3"><i class="bi bi-star-fill text-warning me-1"></i> Starters</h6><ul class="list-group list-group-flush glass-card mb-4">`;
+        
+        starters.forEach(pid => {
+          const info = playersDict[pid] || {};
+          const pname = info.first_name ? `${info.first_name} ${info.last_name}` : pid;
+          html += `<li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary">
+            <div><strong>${pname}</strong> <span class="small text-muted">(${info.team || 'FA'})</span></div>
+            <span class="badge bg-primary">${info.position || 'DEF'}</span>
+          </li>`;
+        });
+
+        html += `</ul><h6 class="text-secondary fw-bold mb-3"><i class="bi bi-person-lines-fill me-1"></i> Bench</h6><ul class="list-group list-group-flush glass-card">`;
+
+        bench.forEach(pid => {
+          const info = playersDict[pid] || {};
+          const pname = info.first_name ? `${info.first_name} ${info.last_name}` : pid;
+          html += `<li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary">
+            <div>${pname} <span class="small text-muted">(${info.team || 'FA'})</span></div>
+            <span class="badge bg-secondary">${info.position || 'DEF'}</span>
+          </li>`;
+        });
+
+        html += `</ul>`;
+        body.innerHTML = html;
+
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Error fetching data: ${err.message}</td></tr>`;
+        body.innerHTML = `<div class="text-center text-danger py-3">Error loading roster details: ${err.message}</div>`;
       }
     }
   </script>
