@@ -345,7 +345,10 @@
             };
             
             marketValues[pickId] = { fc: val, sg: 0, dd: 0, avg: val, validSources: 1 };
-          } else if (sId && marketValues[sId]) {
+          } else if (sId) {
+            if (!marketValues[sId]) {
+              marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+            }
             marketValues[sId].fc = val;
             marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
           }
@@ -360,7 +363,10 @@
         arr.forEach(item => {
           const sId = item.sleeper_id || item.sleeperId;
           const val = item.value || 0;
-          if (sId && marketValues[sId]) {
+          if (sId) {
+            if (!marketValues[sId]) {
+              marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+            }
             marketValues[sId].sg = val;
             marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
           }
@@ -375,7 +381,10 @@
         arr.forEach(item => {
           const sId = item.sleeper_id || item.sleeperId;
           const val = item.value || 0;
-          if (sId && marketValues[sId]) {
+          if (sId) {
+            if (!marketValues[sId]) {
+              marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+            }
             marketValues[sId].dd = val;
             marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
           }
