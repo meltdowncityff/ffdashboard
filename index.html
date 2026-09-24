@@ -17,26 +17,23 @@
       --border-subtle: rgba(255, 255, 255, 0.08);
       --border-hover: rgba(255, 255, 255, 0.14);
       --accent: #6366f1;
-      --accent-hover: #818cf8;
-      --accent-glow: rgba(99, 102, 241, 0.45);
+      --accent-glow: rgba(99, 102, 241, 0.4);
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --success: #34d399;
       --warning: #fbbf24;
       --danger: #f87171;
-      --radius-lg: 20px;
-      --radius-md: 14px;
-      --radius-sm: 10px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 9px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       background-color: var(--bg-deep) !important;
       background-image: 
-        radial-gradient(ellipse 120% 80% at 50% -20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 120% 70% at 50% -15%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
         linear-gradient(rgba(56, 189, 248, 0.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(56, 189, 248, 0.025) 1px, transparent 1px) !important;
       background-size: 100% 100%, 48px 48px, 48px 48px !important;
@@ -49,15 +46,15 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ===== Hero Header ===== */
+    /* ===== Hero – more compact ===== */
     .hero-header {
-      padding: 3rem 1rem 2.75rem;
+      padding: 2.1rem 1rem 1.9rem;
       text-align: center;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(0, 0, 0, 0.28);
       border-bottom: 1px solid var(--border-subtle);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      margin-bottom: 2.5rem;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      margin-bottom: 1.75rem;
       position: relative;
     }
 
@@ -65,57 +62,57 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at center top, rgba(99, 102, 241, 0.08), transparent 70%);
+      background: radial-gradient(ellipse at center top, rgba(99, 102, 241, 0.07), transparent 70%);
       pointer-events: none;
     }
 
     .hero-title {
       font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
       font-weight: 800;
-      font-size: clamp(2rem, 5vw, 3.1rem);
+      font-size: clamp(1.9rem, 4.5vw, 2.7rem);
       letter-spacing: -0.03em;
       line-height: 1.15;
       background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 45%, #a5b4fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.25rem;
     }
 
     .hero-subtitle {
       color: var(--text-secondary);
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 500;
-      letter-spacing: -0.01em;
+      margin-bottom: 1.35rem;
     }
 
-    /* Controls container */
+    /* Controls stay horizontal & compact */
     .hero-controls {
       display: inline-flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
+      flex-wrap: nowrap;
+      gap: 0.6rem;
       justify-content: center;
       align-items: center;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.55);
       border: 1px solid var(--border-subtle);
       border-radius: 999px;
-      padding: 0.6rem 0.75rem;
+      padding: 0.45rem 0.55rem 0.45rem 0.7rem;
       backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
     }
 
     /* ===== Glass Cards ===== */
     .glass-card {
       background: var(--bg-card);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 8px 28px rgba(0, 0, 0, 0.35),
         inset 0 1px 0 rgba(255, 255, 255, 0.04);
       overflow: hidden;
-      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      transition: border-color 0.25s ease;
     }
 
     .glass-card:hover {
@@ -147,13 +144,13 @@
       font-weight: 600;
       color: var(--text-secondary) !important;
       border-bottom: 1px solid var(--border-subtle) !important;
-      padding-top: 1rem;
-      padding-bottom: 0.85rem;
+      padding-top: 0.9rem;
+      padding-bottom: 0.8rem;
     }
 
     .table tbody td {
-      padding-top: 0.95rem;
-      padding-bottom: 0.95rem;
+      padding-top: 0.85rem;
+      padding-bottom: 0.85rem;
       border-color: rgba(255, 255, 255, 0.04) !important;
       vertical-align: middle;
     }
@@ -165,19 +162,17 @@
       text-decoration: none;
       transition: color 0.2s ease;
     }
-    .league-link:hover { 
-      color: #bae6fd; 
-    }
+    .league-link:hover { color: #bae6fd; }
     
     .section-header {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding-bottom: 0.75rem;
-      margin-top: 2.5rem;
-      margin-bottom: 1.25rem;
+      gap: 0.7rem;
+      padding-bottom: 0.65rem;
+      margin-top: 1.75rem;
+      margin-bottom: 1rem;
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: var(--text-primary);
       letter-spacing: -0.02em;
@@ -185,16 +180,17 @@
 
     .section-header::before {
       content: '';
-      width: 4px;
-      height: 1.15em;
+      width: 3.5px;
+      height: 1.1em;
       background: linear-gradient(180deg, var(--accent), #818cf8);
       border-radius: 4px;
+      flex-shrink: 0;
     }
 
     .avatar-img {
-      width: 42px; 
-      height: 42px;
-      border-radius: 12px; 
+      width: 40px; 
+      height: 40px;
+      border-radius: 10px; 
       object-fit: cover;
       border: 1px solid rgba(255,255,255,0.12);
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -204,17 +200,17 @@
     .status-ques { color: var(--warning); }
     .status-out { color: var(--danger); }
     
-    /* ===== Modern Tabs ===== */
+    /* ===== Tabs – compact ===== */
     .custom-tabs-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 2.25rem;
+      gap: 0.4rem;
+      margin-bottom: 1.75rem;
       justify-content: center;
       background: rgba(15, 23, 42, 0.5);
       border: 1px solid var(--border-subtle);
       border-radius: 999px;
-      padding: 0.4rem;
+      padding: 0.35rem;
       width: fit-content;
       max-width: 100%;
       margin-left: auto;
@@ -226,10 +222,10 @@
       background: transparent;
       border: none;
       color: var(--text-secondary);
-      padding: 0.65rem 1.35rem;
+      padding: 0.55rem 1.2rem;
       border-radius: 999px;
       font-weight: 600;
-      font-size: 0.925rem;
+      font-size: 0.9rem;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
     }
@@ -242,19 +238,14 @@
     .custom-tab.active {
       background: linear-gradient(135deg, #6366f1, #4f46e5);
       color: white;
-      box-shadow: 0 4px 18px var(--accent-glow);
+      box-shadow: 0 4px 16px var(--accent-glow);
     }
 
-    .tab-content { 
-      display: none; 
-      animation: fadeIn 0.4s ease; 
-    }
-    .tab-content.active { 
-      display: block; 
-    }
+    .tab-content { display: none; animation: fadeIn 0.35s ease; }
+    .tab-content.active { display: block; }
     
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
     
@@ -262,110 +253,91 @@
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: var(--radius-md);
-      padding: 1rem 0.75rem;
+      padding: 0.9rem 0.7rem;
       text-align: center;
-      transition: background 0.2s ease;
-    }
-
-    .stat-box:hover {
-      background: rgba(255, 255, 255, 0.05);
     }
     
-    /* ===== Trade Analyzer ===== */
+    /* Trade Analyzer */
     .trade-side { 
-      min-height: 260px; 
-      background: rgba(0, 0, 0, 0.35); 
+      min-height: 240px; 
+      background: rgba(0, 0, 0, 0.32); 
       border-radius: var(--radius-md); 
-      padding: 1.1rem; 
+      padding: 1rem; 
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .player-pill { 
       background: rgba(255, 255, 255, 0.05); 
-      padding: 0.85rem 1rem; 
+      padding: 0.75rem 0.95rem; 
       border-radius: var(--radius-sm); 
-      margin-bottom: 0.6rem; 
+      margin-bottom: 0.5rem; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
       border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: background 0.2s ease, border-color 0.2s ease;
+      transition: background 0.2s ease;
     }
 
     .player-pill:hover {
       background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.1);
     }
 
     .remove-btn { 
       cursor: pointer; 
       color: #f87171; 
       transition: color 0.2s, transform 0.15s; 
-      font-size: 1.15rem; 
+      font-size: 1.1rem; 
     }
-    .remove-btn:hover { 
-      color: #fca5a5; 
-      transform: scale(1.1);
-    }
+    .remove-btn:hover { color: #fca5a5; transform: scale(1.1); }
 
-    /* ===== Footer ===== */
     footer {
       margin-top: auto;
       border-top: 1px solid var(--border-subtle);
-      background: rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(16px);
-      padding: 2.25rem 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(14px);
+      padding: 1.75rem 0;
     }
 
-    .hover-white:hover { 
-      color: #fff !important; 
-    }
+    .hover-white:hover { color: #fff !important; }
 
-    /* ===== Form Controls ===== */
+    /* Form controls – compact */
     .glass-input {
-      background: rgba(0, 0, 0, 0.45) !important;
+      background: rgba(0, 0, 0, 0.4) !important;
       border: 1px solid rgba(255, 255, 255, 0.12) !important;
       color: #fff !important;
       border-radius: 999px !important;
-      padding: 0.55rem 1.1rem !important;
+      padding: 0.45rem 1rem !important;
       font-weight: 500;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      font-size: 0.925rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .glass-input:focus {
-      background: rgba(0, 0, 0, 0.6) !important;
+      background: rgba(0, 0, 0, 0.55) !important;
       border-color: var(--accent) !important;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22) !important;
       outline: none;
     }
 
-    .glass-input::placeholder {
-      color: #64748b;
-    }
+    .glass-input::placeholder { color: #64748b; }
 
-    /* Primary Button */
     .btn-primary {
       background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
       border: none !important;
       color: white !important;
       font-weight: 600;
       border-radius: 999px !important;
-      padding: 0.55rem 1.5rem !important;
-      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+      padding: 0.45rem 1.35rem !important;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
     .btn-primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 22px rgba(99, 102, 241, 0.55) !important;
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5) !important;
       background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
     }
 
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    /* Outline info button (KTC) */
     .btn-outline-info {
       border-radius: 999px !important;
       font-weight: 600;
@@ -375,77 +347,50 @@
 
     .btn-outline-info:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.22);
     }
 
-    /* Badges */
-    .badge {
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
+    .badge { font-weight: 600; letter-spacing: 0.02em; }
 
-    /* Record badge */
     .badge.bg-success {
       background: rgba(52, 211, 153, 0.15) !important;
       color: #34d399 !important;
       border: 1px solid rgba(52, 211, 153, 0.3) !important;
     }
 
-    /* Modal refinements */
     .modal-content {
-      border-radius: 20px !important;
+      border-radius: 18px !important;
       overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
     }
 
-    .modal-header {
-      padding: 1.25rem 1.5rem;
-    }
+    .modal-header { padding: 1.15rem 1.4rem; }
+    .modal-body { padding: 1.35rem; }
 
-    .modal-body {
-      padding: 1.5rem;
-    }
-
-    /* Loading */
     .spinner-border {
-      width: 3.25rem;
-      height: 3.25rem;
-      border-width: 0.25em;
+      width: 3rem;
+      height: 3rem;
+      border-width: 0.22em;
     }
 
-    /* Utility */
-    .text-info {
-      color: #7dd3fc !important;
-    }
+    .text-info { color: #7dd3fc !important; }
 
-    /* Empty state icon */
-    .empty-state i {
-      opacity: 0.4;
-    }
-
-    /* Responsive tweaks */
-    @media (max-width: 768px) {
-      .hero-header {
-        padding: 2.25rem 1rem 2rem;
-      }
+    /* Mobile */
+    @media (max-width: 576px) {
       .hero-controls {
+        flex-wrap: wrap;
         border-radius: 16px;
-        padding: 0.75rem;
-        width: 100%;
-        max-width: 360px;
+        padding: 0.6rem;
+        max-width: 100%;
       }
       .custom-tabs-container {
-        border-radius: 16px;
+        border-radius: 14px;
         width: 100%;
-        justify-content: flex-start;
         overflow-x: auto;
         flex-wrap: nowrap;
-        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
       }
-      .custom-tab {
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
+      .custom-tab { white-space: nowrap; flex-shrink: 0; }
     }
   </style>
 </head>
@@ -453,23 +398,23 @@
 
 <!-- Hero Header -->
   <div class="hero-header">
-    <div class="container-fluid px-4 position-relative">
-      <h1 class="hero-title mb-2">
+    <div class="container-fluid px-3 px-md-4 position-relative">
+      <h1 class="hero-title">
         <i class="bi bi-trophy-fill text-warning me-2" style="-webkit-text-fill-color: #fbbf24;"></i>
         FFAddict Dynasty War Room
       </h1>
-      <p class="hero-subtitle mb-4">Your Ultimate Dynasty Football Command Center</p>
+      <p class="hero-subtitle">Your Ultimate Dynasty Football Command Center</p>
       
       <div class="hero-controls">
-        <input type="text" id="usernameInput" class="form-control glass-input" placeholder="Sleeper Username" style="max-width: 200px; min-width: 160px;">
-        <select id="seasonSelect" class="form-select glass-input" style="max-width: 110px;"></select>
-        <button id="fetchBtn" class="btn btn-primary fw-bold px-4">Load Data</button>
+        <input type="text" id="usernameInput" class="form-control glass-input" placeholder="Sleeper Username" style="max-width: 190px; min-width: 150px;">
+        <select id="seasonSelect" class="form-select glass-input" style="max-width: 100px;"></select>
+        <button id="fetchBtn" class="btn btn-primary fw-bold">Load Data</button>
       </div>
     </div>
   </div>
 
   <!-- Main Area -->
-  <div class="container-fluid px-4 px-md-5 mb-5" style="max-width: 1440px; margin-left: auto; margin-right: auto;">
+  <div class="container-fluid px-3 px-md-4 px-lg-5 mb-4" style="max-width: 1400px; margin-left: auto; margin-right: auto;">
     
     <!-- Tab Controls -->
     <div class="custom-tabs-container">
@@ -488,8 +433,8 @@
     <!-- TAB 1: Leagues -->
     <div id="leaguesTab" class="tab-content active">
       <div id="leaguesContainer">
-        <div class="glass-card text-center text-muted py-5 empty-state">
-          <i class="bi bi-search fs-1 mb-3 d-block"></i>
+        <div class="glass-card text-center text-muted py-5">
+          <i class="bi bi-search fs-1 mb-3 d-block opacity-50"></i>
           Enter your username and click Load Data.
         </div>
       </div>
@@ -497,7 +442,7 @@
 
     <!-- TAB 2: Players -->
     <div id="playersTab" class="tab-content">
-      <div class="glass-card p-3 p-md-4">
+      <div class="glass-card p-3">
         <div class="table-responsive">
           <table class="table table-dark table-hover align-middle mb-0">
             <thead>
@@ -520,7 +465,7 @@
 
     <!-- TAB 3: Trade Analyzer -->
     <div id="analyzerTab" class="tab-content">
-      <div class="glass-card p-4 p-md-5">
+      <div class="glass-card p-4">
         <div class="row text-center mb-4">
           <div class="col-12">
             <h4 class="fw-bold text-white mb-2" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.02em;">Dynasty Trade Analyzer</h4>
@@ -567,7 +512,7 @@
 
     <!-- TAB 4: League Value Board -->
     <div id="valueBoardTab" class="tab-content">
-      <div class="glass-card p-4 p-md-5">
+      <div class="glass-card p-4">
         <div class="row align-items-center mb-4 g-3">
           <div class="col-md-8">
             <h4 class="fw-bold text-white mb-2" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.02em;">League Value Board</h4>
@@ -609,7 +554,7 @@
   <!-- Roster Modal -->
   <div class="modal fade" id="rosterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
-      <div class="modal-content text-white" style="background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
+      <div class="modal-content text-white" style="background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.1);">
         <div class="modal-header border-bottom border-secondary border-opacity-25">
           <h5 class="modal-title fw-bold" id="rosterModalTitle" style="font-family: 'Plus Jakarta Sans', sans-serif;">Team Roster</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -622,7 +567,7 @@
   <!-- Player Shares Modal -->
   <div class="modal fade" id="sharesModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content text-white" style="background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
+      <div class="modal-content text-white" style="background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.1);">
         <div class="modal-header border-bottom border-secondary border-opacity-25">
           <h5 class="modal-title fw-bold" id="sharesModalTitle" style="font-family: 'Plus Jakarta Sans', sans-serif;">Leagues Owned</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
