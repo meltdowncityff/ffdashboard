@@ -166,7 +166,83 @@
       transition: color 0.2s ease;
     }
     .league-link:hover { color: #bae6fd; }
-    
+
+    .table-search-wrap {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.85rem;
+    }
+    .table-search { max-width: 360px; width: 100%; }
+    .sortable-th {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+    .sortable-th:hover {
+      color: #fff !important;
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .sort-indicator {
+      display: inline-block;
+      width: 1rem;
+      margin-left: 0.2rem;
+      color: #818cf8;
+      font-size: 0.72rem;
+    }
+
+    .league-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      padding: 0.25rem 0 0.65rem;
+      user-select: none;
+    }
+
+    .league-section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 0;
+    }
+
+    .league-section-title .section-header {
+      margin: 0;
+      padding: 0;
+    }
+
+    .league-section-toggle {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      transition: transform 0.2s ease;
+    }
+
+    .league-section-toggle.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .section-search {
+      width: min(320px, 45vw);
+      flex-shrink: 0;
+    }
+
+    .players-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .players-section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin: 0;
+    }
+
     .section-header {
       display: flex;
       align-items: center;
@@ -397,6 +473,377 @@
       }
       .custom-tab { white-space: nowrap; flex-shrink: 0; }
     }
+
+
+    /* ===== Dashboard UX Polish ===== */
+    :root {
+      --bg-deep: #050816;
+      --bg-card: rgba(12, 18, 38, 0.64);
+      --bg-card-solid: rgba(10, 16, 32, 0.96);
+      --glow-indigo: rgba(99, 102, 241, 0.34);
+      --glow-cyan: rgba(56, 189, 248, 0.16);
+      --glow-violet: rgba(139, 92, 246, 0.14);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg-deep);
+    }
+
+    body {
+      min-width: 0;
+      background-color: var(--bg-deep) !important;
+      background-image:
+        radial-gradient(ellipse 85% 55% at 50% -8%, var(--glow-indigo) 0%, transparent 62%),
+        radial-gradient(ellipse 60% 48% at 92% 15%, var(--glow-cyan) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 44% at 8% 78%, var(--glow-violet) 0%, transparent 68%),
+        linear-gradient(rgba(99, 102, 241, 0.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.028) 1px, transparent 1px),
+        linear-gradient(180deg, #060914 0%, #050816 55%, #040610 100%) !important;
+      background-size: 100% 100%, 100% 100%, 100% 100%, 58px 58px, 58px 58px, 100% 100% !important;
+      background-attachment: fixed, fixed, fixed, fixed, fixed, fixed !important;
+    }
+
+    .hero-header {
+      background: linear-gradient(180deg, rgba(5, 8, 22, 0.55), rgba(5, 8, 22, 0.34)) !important;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .hero-header::before {
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(129, 140, 248, 0.16), transparent 65%),
+        radial-gradient(circle at 20% 50%, rgba(56, 189, 248, 0.05), transparent 32%);
+    }
+
+    .glass-card {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.70), rgba(8, 13, 28, 0.60)) !important;
+      border-color: rgba(148, 163, 184, 0.10) !important;
+      box-shadow:
+        0 14px 38px rgba(0, 0, 0, 0.35),
+        0 1px 0 rgba(255, 255, 255, 0.035) inset,
+        0 0 0 1px rgba(99, 102, 241, 0.02) inset;
+    }
+
+    .custom-tabs-container {
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+    }
+
+    .table-sort-button {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+      padding: 0.15rem 0.1rem;
+      margin: 0;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: color 0.18s ease, background 0.18s ease;
+    }
+
+    .table-sort-button:hover,
+    .table-sort-button:focus-visible {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.10);
+      outline: none;
+    }
+
+    .table-sort-button:focus-visible {
+      box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.40);
+    }
+
+    .league-link-button {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      background: transparent;
+      color: #7dd3fc;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      text-align: left;
+      padding: 0;
+      transition: color 0.2s ease;
+    }
+
+    .league-link-button:hover,
+    .league-link-button:focus-visible {
+      color: #bae6fd;
+      outline: none;
+    }
+
+    .league-section-toggle-btn {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 0;
+      cursor: pointer;
+      text-align: left;
+      border-radius: 8px;
+    }
+
+    .league-section-toggle-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.40);
+    }
+
+    .league-section-header {
+      padding: 0.30rem 0 0.70rem !important;
+    }
+
+    .league-section-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      opacity: 1;
+      margin-bottom: 1.35rem;
+      transition: grid-template-rows 220ms ease, opacity 180ms ease, margin-bottom 220ms ease;
+    }
+
+    .league-section-body.collapsed {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      margin-bottom: 0.55rem;
+    }
+
+    .league-section-inner {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .league-section-inner > .glass-card {
+      margin-top: 0.05rem;
+    }
+
+    .section-search .input-group,
+    .players-section-header .input-group {
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    .players-section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .players-section-title::before {
+      content: '';
+      width: 3.5px;
+      height: 1.05em;
+      border-radius: 4px;
+      background: linear-gradient(180deg, var(--accent), #818cf8);
+      flex-shrink: 0;
+    }
+
+    .sticky-first {
+      min-width: 720px;
+    }
+
+    .loading-shell {
+      width: min(100%, 520px);
+      margin: 0 auto;
+      padding: 1.15rem 1.25rem 1.25rem;
+      border-radius: 18px;
+      background: rgba(8, 13, 28, 0.66);
+      border: 1px solid rgba(148, 163, 184, 0.10);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .loading-progress {
+      height: 6px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.10);
+    }
+
+    .loading-progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #4f46e5, #818cf8, #38bdf8);
+      transition: width 220ms ease;
+    }
+
+    .data-freshness {
+      color: #64748b;
+      font-size: 0.72rem;
+      margin-top: 0.8rem;
+      text-align: center;
+    }
+
+    .desktop-only-tip {
+      color: #64748b;
+      font-size: 0.72rem;
+    }
+
+    @media (hover: hover) {
+      .glass-card:hover {
+        transform: translateY(-1px);
+        transition: border-color 0.25s ease, transform 0.2s ease;
+      }
+    }
+
+    @media (max-width: 576px) {
+      body {
+        background-attachment: scroll, scroll, scroll, scroll, scroll, scroll !important;
+      }
+
+      .hero-header {
+        padding: 1.55rem 0.75rem 1.35rem !important;
+        margin-bottom: 1.1rem !important;
+      }
+
+      .hero-title {
+        font-size: clamp(1.55rem, 8vw, 2rem);
+      }
+
+      .hero-subtitle {
+        font-size: 0.88rem;
+        margin-bottom: 1rem;
+      }
+
+      .hero-controls {
+        display: grid !important;
+        grid-template-columns: 1fr auto;
+        width: min(100%, 430px);
+        border-radius: 18px !important;
+        padding: 0.6rem !important;
+        gap: 0.5rem;
+      }
+
+      .hero-controls #usernameInput {
+        grid-column: 1 / -1;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+      }
+
+      .hero-controls #seasonSelect {
+        width: 100% !important;
+        max-width: none !important;
+      }
+
+      .hero-controls #fetchBtn {
+        width: 100%;
+      }
+
+      .custom-tabs-container {
+        width: 100%;
+        overflow-x: auto;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+        border-radius: 14px;
+      }
+
+      .custom-tabs-container::-webkit-scrollbar {
+        display: none;
+      }
+
+      .custom-tab {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 0.55rem 0.95rem;
+        font-size: 0.82rem;
+      }
+
+      .section-search,
+      .players-section-header .section-search {
+        width: 100%;
+      }
+
+      .league-section-header,
+      .players-section-header {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 0.6rem;
+      }
+
+      .league-section-title {
+        width: 100%;
+      }
+
+      .league-section-toggle-btn {
+        width: 100%;
+      }
+
+      .league-section-toggle-btn .section-header {
+        font-size: 1.0rem;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+      }
+
+      .sticky-first thead th:first-child,
+      .sticky-first tbody td:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--bg-card-solid) !important;
+      }
+
+      .sticky-first thead th:first-child {
+        z-index: 5;
+        box-shadow: 3px 0 10px rgba(0, 0, 0, 0.26);
+      }
+
+      .sticky-first tbody td:first-child {
+        z-index: 3;
+        box-shadow: 3px 0 10px rgba(0, 0, 0, 0.20);
+      }
+
+      #leaguesTab .sticky-first {
+        min-width: 760px;
+      }
+
+      #playersTab .sticky-first {
+        min-width: 690px;
+      }
+
+      .avatar-img {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+      }
+
+      .table thead th {
+        padding-top: 0.72rem;
+        padding-bottom: 0.68rem;
+      }
+
+      .table tbody td {
+        padding-top: 0.72rem;
+        padding-bottom: 0.72rem;
+      }
+
+      .loading-shell {
+        padding: 1rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -430,9 +877,15 @@
     </div>
 
     <!-- Loading State -->
-    <div id="loadingIndicator" class="text-center py-5 d-none">
-      <div class="spinner-border text-primary shadow-sm" role="status"></div>
-      <div id="loadingText" class="mt-3 text-light fw-semibold fs-5">Fetching Data...</div>
+    <div id="loadingIndicator" class="text-center py-5 d-none" aria-live="polite">
+      <div class="loading-shell">
+        <div class="spinner-border text-primary shadow-sm" role="status" aria-hidden="true"></div>
+        <div id="loadingText" class="mt-3 text-light fw-semibold fs-5">Fetching Data...</div>
+        <div id="loadingSubtext" class="mt-1 text-muted small">Preparing your dashboard...</div>
+        <div class="loading-progress mt-3" role="progressbar" aria-label="Data loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="loadingProgressBar" class="loading-progress-bar"></div>
+        </div>
+      </div>
     </div>
 
     <!-- TAB 1: Leagues -->
@@ -448,16 +901,26 @@
     <!-- TAB 2: Players -->
     <div id="playersTab" class="tab-content">
       <div class="glass-card p-3">
+        <div class="players-section-header">
+          <h3 class="players-section-title fs-5 mb-0">My Players</h3>
+          <div class="section-search">
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-secondary text-muted"><i class="bi bi-search"></i></span>
+              <input type="search" id="playersSearchInput" class="form-control glass-input rounded-start-0"
+                     placeholder="Search players..." aria-label="Search my players" inputmode="search" autocomplete="off">
+            </div>
+          </div>
+        </div>
         <div class="table-responsive">
-          <table class="table table-dark table-hover align-middle mb-0">
+          <table class="table table-dark table-hover align-middle mb-0 sticky-first">
             <thead>
               <tr class="text-secondary small text-uppercase">
-                <th>Player</th>
-                <th>Pos</th>
-                <th>Team</th>
-                <th>Shares</th>
-                <th>Exposure</th>
-                <th>Health</th>
+                <th scope="col"><button type="button" class="table-sort-button" onclick="sortPlayers('name')">Player<span class="sort-indicator"></span></button></th>
+                <th scope="col"><button type="button" class="table-sort-button" onclick="sortPlayers('pos')">Pos<span class="sort-indicator"></span></button></th>
+                <th scope="col"><button type="button" class="table-sort-button" onclick="sortPlayers('team')">Team<span class="sort-indicator"></span></button></th>
+                <th scope="col"><button type="button" class="table-sort-button" onclick="sortPlayers('shares')">Shares<span class="sort-indicator"></span></button></th>
+                <th scope="col"><button type="button" class="table-sort-button" onclick="sortPlayers('exposure')">Exposure<span class="sort-indicator"></span></button></th>
+                <th scope="col"><button type="button" class="table-sort-button" onclick="sortPlayers('health')">Health<span class="sort-indicator"></span></button></th>
               </tr>
             </thead>
             <tbody id="playersTableBody">
@@ -543,13 +1006,13 @@
     <div class="container text-center">
       <div class="small text-muted mb-3">Market values supplied by public APIs. For entertainment purposes.</div>
       <div class="d-flex flex-wrap justify-content-center gap-4">
-        <a href="https://fantasycalc.com" target="_blank" class="text-secondary text-decoration-none hover-white">
+        <a href="https://fantasycalc.com" target="_blank" rel="noopener noreferrer" class="text-secondary text-decoration-none hover-white">
           <i class="bi bi-calculator me-1"></i> FantasyCalc
         </a>
-        <a href="https://statsguyfantasy.com" target="_blank" class="text-secondary text-decoration-none hover-white">
+        <a href="https://statsguyfantasy.com" target="_blank" rel="noopener noreferrer" class="text-secondary text-decoration-none hover-white">
           <i class="bi bi-bar-chart me-1"></i> Stats Guy
         </a>
-        <a href="https://dynastydealer.com" target="_blank" class="text-secondary text-decoration-none hover-white">
+        <a href="https://dynastydealer.com" target="_blank" rel="noopener noreferrer" class="text-secondary text-decoration-none hover-white">
           <i class="bi bi-tags me-1"></i> Dynasty Dealer
         </a>
       </div>
@@ -593,6 +1056,32 @@
     let tradeSideA = [];
     let tradeSideB = [];
 
+    let leagueSearchTerm = '';
+    let leagueSort = { key: 'league', dir: 'asc' };
+    let leagueCollapsed = { lineup: false, bestball: false };
+    let playerSearchTerm = '';
+    let playerSort = { key: 'shares', dir: 'desc' };
+    let leagueUserCache = {};
+    let isLoading = false;
+
+    function loadUiPreferences() {
+      try {
+        const savedCollapsed = JSON.parse(localStorage.getItem('ffaddict_league_collapsed') || '{}');
+        leagueCollapsed = {
+          lineup: savedCollapsed.lineup === true,
+          bestball: savedCollapsed.bestball === true
+        };
+      } catch (e) {
+        leagueCollapsed = { lineup: false, bestball: false };
+      }
+    }
+
+    function saveUiPreferences() {
+      try {
+        localStorage.setItem('ffaddict_league_collapsed', JSON.stringify(leagueCollapsed));
+      } catch (e) { /* Ignore storage errors. */ }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const currentYear = new Date().getMonth() < 2 ? new Date().getFullYear() - 1 : new Date().getFullYear();
       document.getElementById('seasonSelect').innerHTML = `
@@ -601,9 +1090,19 @@
       `;
 
       const savedUser = localStorage.getItem('sleeper_username');
+      const savedSeason = localStorage.getItem('sleeper_season');
       if (savedUser) document.getElementById('usernameInput').value = savedUser;
+      if (savedSeason && document.querySelector(`#seasonSelect option[value="${savedSeason}"]`)) {
+        document.getElementById('seasonSelect').value = savedSeason;
+      }
 
+      loadUiPreferences();
       initDraftPicks();
+
+      document.getElementById('playersSearchInput')?.addEventListener('input', (e) => {
+        playerSearchTerm = e.target.value.trim().toLowerCase();
+        renderPlayers(globalPlayerShares, allLeaguesData.length);
+      });
     });
 
     function initDraftPicks() {
@@ -645,15 +1144,60 @@
       btnElement.classList.add('active');
     }
 
-    function showLoading(text) {
+    function showLoading(text, subtext = 'Preparing your dashboard...') {
       document.getElementById('loadingIndicator').classList.remove('d-none');
       document.getElementById('loadingText').textContent = text;
+      document.getElementById('loadingSubtext').textContent = subtext;
+      setLoadingProgress(0);
       document.getElementById('leaguesContainer').innerHTML = '';
       document.getElementById('playersTableBody').innerHTML = '';
     }
 
+    function setLoadingProgress(percent) {
+      const value = Math.max(0, Math.min(100, Math.round(percent)));
+      const bar = document.getElementById('loadingProgressBar');
+      const track = bar?.parentElement;
+      if (bar) bar.style.width = `${value}%`;
+      if (track) track.setAttribute('aria-valuenow', String(value));
+    }
+
     function hideLoading() {
       document.getElementById('loadingIndicator').classList.add('d-none');
+    }
+
+    function updateLoadingProgress(done, total, label = 'Loading leagues & rosters...') {
+      const pct = total ? (done / total) * 100 : 100;
+      document.getElementById('loadingText').textContent = label;
+      document.getElementById('loadingSubtext').textContent = total ? `${done} of ${total} leagues processed` : 'Almost there...';
+      setLoadingProgress(pct);
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(`Request failed (${response.status})`);
+      return response.json();
+    }
+
+    async function mapWithConcurrency(items, limit, worker) {
+      const results = new Array(items.length);
+      let cursor = 0;
+
+      async function runWorker() {
+        while (true) {
+          const index = cursor++;
+          if (index >= items.length) return;
+          try {
+            results[index] = await worker(items[index], index);
+          } catch (error) {
+            results[index] = null;
+            console.warn('Data load error:', error);
+          }
+        }
+      }
+
+      const workerCount = Math.min(Math.max(1, limit), items.length || 1);
+      await Promise.all(Array.from({ length: workerCount }, runWorker));
+      return results;
     }
 
     function calcPF(settings) {
@@ -667,75 +1211,111 @@
     }
 
     async function fetchMarketValueApi() {
-      try {
-        const fcRes = await fetch('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te%2B');
-        if (!fcRes.ok) throw new Error(`FantasyCalc responded with ${fcRes.status}`);
-        const fcData = await fcRes.json();
-        
-        fcData.forEach(item => {
-          const p = item.player || item;
-          const sId = p.sleeperId ? String(p.sleeperId) : String(p.id || item.id);
-          const val = item.value || 0;
-          const name = (p.name || p.fullName || "").trim();
-          const pos = (p.position || "").toUpperCase();
+      const loaders = [
+        async () => {
+          const fcData = await fetchJson('https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1&tep=te%2B');
+          fcData.forEach(item => {
+            const p = item.player || item;
+            const sId = p.sleeperId ? String(p.sleeperId) : String(p.id || item.id);
+            const val = item.value || 0;
+            const name = (p.name || p.fullName || '').trim();
+            const pos = (p.position || '').toUpperCase();
 
-          if (pos === 'PICK' || name.toLowerCase().includes('1st') || name.toLowerCase().includes('2nd') || name.toLowerCase().includes('3rd') || name.toLowerCase().includes('4th') || name.toLowerCase().includes('pick')) {
-            const pickId = `pick_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-            
-            nflPlayersDb[pickId] = { full_name: name, position: 'PICK', team: 'PICK' };
-            
-            if (!marketValues[pickId]) marketValues[pickId] = { fc: val, sg: 0, dd: 0, avg: val, validSources: 1 };
-            else { marketValues[pickId].fc = val; marketValues[pickId].avg = val; }
-          } else {
-            if (sId) {
-              if (!marketValues[sId]) marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
-              marketValues[sId].fc = val;
-              marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
+            if (pos === 'PICK' || /\b(1st|2nd|3rd|4th)\b|pick/i.test(name)) {
+              const pickId = `pick_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+              nflPlayersDb[pickId] = { full_name: name, position: 'PICK', team: 'PICK' };
+              if (!marketValues[pickId]) marketValues[pickId] = { fc: val, sg: 0, dd: 0, avg: val, validSources: 1 };
+              else { marketValues[pickId].fc = val; marketValues[pickId].avg = val; }
+            } else {
+              if (sId) {
+                if (!marketValues[sId]) marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
+                marketValues[sId].fc = val;
+                marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
+              }
+              if (name) marketValues[`name_${name.toLowerCase().replace(/[^a-z0-9]/g, '')}`] = val;
             }
-            const nameKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            marketValues[`name_${nameKey}`] = val;
-          }
-        });
-      } catch (e) { console.warn("FantasyCalc fetch error:", e); }
-
-      try {
-        const sgRes = await fetch('https://api.statsguyfantasy.com/api/v1/rankings');
-        const sgData = await sgRes.json();
-        const arr = Array.isArray(sgData) ? sgData : (sgData.data || []);
-        arr.forEach(item => {
-          const sId = item.sleeper_id || item.sleeperId;
-          const val = item.value || 0;
-          if (sId) {
+          });
+        },
+        async () => {
+          const sgData = await fetchJson('https://api.statsguyfantasy.com/api/v1/rankings');
+          const arr = Array.isArray(sgData) ? sgData : (sgData.data || []);
+          arr.forEach(item => {
+            const sId = item.sleeper_id || item.sleeperId;
+            const val = item.value || 0;
+            if (!sId) return;
             if (!marketValues[sId]) marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
             marketValues[sId].sg = val;
             marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
-          }
-        });
-      } catch (e) { console.warn("Stats Guy fetch error:", e); }
-
-      try {
-        const ddRes = await fetch('https://www.dynastydealer.com/api/player-values');
-        const ddData = await ddRes.json();
-        const arr = Array.isArray(ddData) ? ddData : (ddData.data || []);
-        arr.forEach(item => {
-          const sId = item.sleeper_id || item.sleeperId;
-          const val = item.value || 0;
-          if (sId) {
+          });
+        },
+        async () => {
+          const ddData = await fetchJson('https://www.dynastydealer.com/api/player-values');
+          const arr = Array.isArray(ddData) ? ddData : (ddData.data || []);
+          arr.forEach(item => {
+            const sId = item.sleeper_id || item.sleeperId;
+            const val = item.value || 0;
+            if (!sId) return;
             if (!marketValues[sId]) marketValues[sId] = { fc: 0, sg: 0, dd: 0, avg: 0, validSources: 0 };
             marketValues[sId].dd = val;
             marketValues[sId].validSources = Math.max(1, marketValues[sId].validSources);
-          }
-        });
-      } catch (e) { console.warn("Dynasty Dealer fetch error:", e); }
+          });
+        }
+      ];
+
+      const results = await Promise.allSettled(loaders.map(loader => loader()));
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          const source = ['FantasyCalc', 'Stats Guy', 'Dynasty Dealer'][index];
+          console.warn(`${source} fetch error:`, result.reason);
+        }
+      });
 
       Object.keys(marketValues).forEach(id => {
-        if (id.startsWith('name_')) return; 
+        if (id.startsWith('name_')) return;
         const m = marketValues[id];
         if (id.startsWith('pick_')) { m.avg = m.fc; return; }
         const vals = [m.fc, m.sg, m.dd].filter(v => v > 0);
         if (vals.length > 0) m.avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
         else if (m.fc > 0) m.avg = m.fc;
       });
+    }
+
+    async function loadPlayerDatabase() {
+      if (isDbLoaded) return;
+      try {
+        const playersData = await fetchJson('https://api.sleeper.app/v1/players/nfl');
+        Object.assign(nflPlayersDb, playersData);
+        isDbLoaded = true;
+      } catch (error) {
+        console.error('Failed to fetch player database.', error);
+      }
+    }
+
+    function getStandingsMap(rosters) {
+      const officialRanks = rosters.every(r => Number.isFinite(Number(r.settings?.rank)) && Number(r.settings.rank) > 0);
+      if (officialRanks) {
+        return new Map(rosters.map(r => [r.roster_id, Number(r.settings.rank)]));
+      }
+
+      const sorted = [...rosters].sort((a, b) => {
+        const aGames = (a.settings?.wins || 0) + (a.settings?.losses || 0) + (a.settings?.ties || 0);
+        const bGames = (b.settings?.wins || 0) + (b.settings?.losses || 0) + (b.settings?.ties || 0);
+        const aWinPct = aGames ? ((a.settings?.wins || 0) + ((a.settings?.ties || 0) * 0.5)) / aGames : 0;
+        const bWinPct = bGames ? ((b.settings?.wins || 0) + ((b.settings?.ties || 0) * 0.5)) / bGames : 0;
+        if (aWinPct !== bWinPct) return bWinPct - aWinPct;
+
+        const aPF = calcPF(a.settings);
+        const bPF = calcPF(b.settings);
+        if (aPF !== bPF) return bPF - aPF;
+
+        const aPA = (a.settings?.fpts_against || 0) + ((a.settings?.fpts_against_decimal || 0) / 100);
+        const bPA = (b.settings?.fpts_against || 0) + ((b.settings?.fpts_against_decimal || 0) / 100);
+        if (aPA !== bPA) return bPA - aPA;
+
+        return Number(a.roster_id || 0) - Number(b.roster_id || 0);
+      });
+
+      return new Map(sorted.map((roster, index) => [roster.roster_id, index + 1]));
     }
 
     function buildSearchDatalist() {
@@ -762,99 +1342,116 @@
     }
 
     document.getElementById('fetchBtn').addEventListener('click', async () => {
+      if (isLoading) return;
+
       const username = document.getElementById('usernameInput').value.trim();
       const season = document.getElementById('seasonSelect').value;
       if (!username) return alert('Enter a username.');
-      localStorage.setItem('sleeper_username', username);
 
-      showLoading('Fetching User ID...');
-      
+      isLoading = true;
+      const fetchButton = document.getElementById('fetchBtn');
+      fetchButton.disabled = true;
+      fetchButton.dataset.originalText = fetchButton.textContent;
+      fetchButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Loading...';
+
+      localStorage.setItem('sleeper_username', username);
+      localStorage.setItem('sleeper_season', season);
+
       try {
-        const userRes = await fetch(`https://api.sleeper.app/v1/user/${username}`);
-        const userData = await userRes.json();
+        showLoading('Finding your Sleeper account...', 'Looking up your username.');
+        setLoadingProgress(5);
+
+        const userData = await fetchJson(`https://api.sleeper.app/v1/user/${encodeURIComponent(username)}`);
         if (!userData || !userData.user_id) throw new Error('User not found.');
 
+        // Player data and market values are independent of league loading, so fetch them together.
+        showLoading('Preparing player data...', 'Loading the NFL database and market values in parallel.');
         if (!isDbLoaded) {
-          showLoading('Downloading NFL Player Database...');
-          try {
-            const dbRes = await fetch('https://api.sleeper.app/v1/players/nfl');
-            const playersData = await dbRes.json();
-            Object.assign(nflPlayersDb, playersData);
-            isDbLoaded = true;
-          } catch (dbErr) {
-            console.error("Failed to fetch player database.", dbErr);
-          }
-          
-          showLoading('Fetching Market Values...');
-          await fetchMarketValueApi();
+          await Promise.all([loadPlayerDatabase(), fetchMarketValueApi()]);
           buildSearchDatalist();
         }
+        setLoadingProgress(25);
 
-        showLoading(`Fetching ${season} Leagues & Rosters...`);
-        const leaguesRes = await fetch(`https://api.sleeper.app/v1/user/${userData.user_id}/leagues/nfl/${season}`);
-        const leagues = await leaguesRes.json();
-        
+        // Start the league request immediately after the shared assets are ready.
+        showLoading(`Fetching ${season} leagues...`, 'Getting your league list from Sleeper.');
+        const leagues = await fetchJson(`https://api.sleeper.app/v1/user/${userData.user_id}/leagues/nfl/${season}`);
+
         if (!leagues || leagues.length === 0) {
           hideLoading();
-          document.getElementById('leaguesContainer').innerHTML = `<div class="glass-card text-center text-muted py-5">No leagues found.</div>`;
+          document.getElementById('leaguesContainer').innerHTML = '<div class="glass-card text-center text-muted py-5">No leagues found.</div>';
+          document.getElementById('playersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5">No leagues found.</td></tr>';
           return;
         }
 
         allLeaguesData = [];
         globalPlayerShares = {};
+        leagueUserCache = {};
+
+        const completed = { count: 0 };
+        const processed = await mapWithConcurrency(leagues, 6, async (lg) => {
+          try {
+            const [rosters, users] = await Promise.all([
+              fetchJson(`https://api.sleeper.app/v1/league/${lg.league_id}/rosters`),
+              fetchJson(`https://api.sleeper.app/v1/league/${lg.league_id}/users`)
+            ]);
+
+            const standingsMap = getStandingsMap(rosters);
+            const myRoster = rosters.find(r =>
+              r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id))
+            );
+
+            if (!myRoster) return null;
+
+            const normalizedRoster = { ...myRoster };
+            normalizedRoster.rank = standingsMap.get(myRoster.roster_id) || null;
+            lg.myRoster = normalizedRoster;
+            lg.allRosters = rosters;
+            lg.users = users || [];
+            lg.userMap = Object.fromEntries((users || []).map(u => [u.user_id, u.display_name || u.username || 'Unknown']));
+            leagueUserCache[lg.league_id] = users || [];
+
+            // Value Board ranking can be computed immediately because market values are already loaded.
+            lg.valueBoardRank = calculateLeagueValueRank(lg);
+
+            if (normalizedRoster.players) {
+              normalizedRoster.players.forEach(pid => {
+                if (!globalPlayerShares[pid]) globalPlayerShares[pid] = { count: 0, leagues: [] };
+                globalPlayerShares[pid].count++;
+                globalPlayerShares[pid].leagues.push({ id: lg.league_id, name: lg.name });
+              });
+            }
+
+            return lg;
+          } finally {
+            completed.count += 1;
+            updateLoadingProgress(25 + (completed.count / leagues.length) * 65, leagues.length, 'Loading leagues & rosters...');
+          }
+        });
+
+        allLeaguesData = processed.filter(Boolean);
 
         const boardSelect = document.getElementById('boardLeagueSelect');
         boardSelect.innerHTML = '<option value="">Select a League...</option>';
+        allLeaguesData.forEach(lg => {
+          boardSelect.insertAdjacentHTML('beforeend', `<option value="${lg.league_id}">${lg.name}</option>`);
+        });
 
-        for (const lg of leagues) {
-          try {
-            const rRes = await fetch(`https://api.sleeper.app/v1/league/${lg.league_id}/rosters`);
-            if (!rRes.ok) continue; 
-            
-            const rosters = await rRes.json();
-            
-            const sortedRosters = rosters.sort((a, b) => {
-              const aPct = ((a.settings?.wins || 0) + ((a.settings?.ties || 0) * 0.5)) / ((a.settings?.wins || 0) + (a.settings?.losses || 0) + (a.settings?.ties || 0) || 1);
-              const bPct = ((b.settings?.wins || 0) + ((b.settings?.ties || 0) * 0.5)) / ((b.settings?.wins || 0) + (b.settings?.losses || 0) + (b.settings?.ties || 0) || 1);
-              if (aPct !== bPct) return bPct - aPct;
-              return calcPF(b.settings) - calcPF(a.settings);
-            });
+        setLoadingProgress(100);
+        document.getElementById('loadingText').textContent = 'Dashboard ready';
+        document.getElementById('loadingSubtext').textContent = `${allLeaguesData.length} leagues loaded`;
 
-            const myRank = sortedRosters.findIndex(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id))) + 1;
-            const myRoster = sortedRosters.find(r => r.owner_id === userData.user_id || (r.co_owners && r.co_owners.includes(userData.user_id)));
-            
-            lg.allRosters = sortedRosters;
-
-            if (myRoster) {
-              myRoster.rank = myRank;
-              lg.myRoster = myRoster;
-
-              // Pre-calculate this now while all rosters and market values are already loaded.
-              // This makes the rank available immediately on the My Leagues tab.
-              lg.valueBoardRank = calculateLeagueValueRank(lg);
-
-              allLeaguesData.push(lg);
-
-              boardSelect.innerHTML += `<option value="${lg.league_id}">${lg.name}</option>`;
-
-              if (myRoster.players) {
-                myRoster.players.forEach(pid => {
-                  if (!globalPlayerShares[pid]) globalPlayerShares[pid] = { count: 0, leagues: [] };
-                  globalPlayerShares[pid].count++;
-                  globalPlayerShares[pid].leagues.push({ id: lg.league_id, name: lg.name });
-                });
-              }
-            }
-          } catch (e) { console.warn(`Could not process league ${lg.name}: `, e); }
-        }
-
-        hideLoading();
         renderLeagues(allLeaguesData);
         renderPlayers(globalPlayerShares, allLeaguesData.length);
 
+        hideLoading();
       } catch (err) {
         hideLoading();
         document.getElementById('leaguesContainer').innerHTML = `<div class="glass-card text-danger py-5 text-center fw-bold">${err.message}</div>`;
+        document.getElementById('playersTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger py-5">${err.message}</td></tr>`;
+      } finally {
+        isLoading = false;
+        fetchButton.disabled = false;
+        fetchButton.textContent = fetchButton.dataset.originalText || 'Load Data';
       }
     });
 
@@ -904,6 +1501,59 @@
       return myIndex >= 0 ? myIndex + 1 : null;
     }
 
+    function toggleSort(state, key) {
+      if (state.key === key) state.dir = state.dir === 'asc' ? 'desc' : 'asc';
+      else { state.key = key; state.dir = 'asc'; }
+    }
+
+    function sortIndicator(state, key) {
+      return state.key === key
+        ? `<span class="sort-indicator" aria-hidden="true">${state.dir === 'asc' ? '▲' : '▼'}</span>`
+        : '<span class="sort-indicator" aria-hidden="true"></span>';
+    }
+
+    function sortButton(state, key, label) {
+      const direction = state.key === key ? (state.dir === 'asc' ? 'ascending' : 'descending') : 'none';
+      return `<button type="button" class="table-sort-button" onclick="sortLeagues('${key}')" aria-label="Sort by ${label}" aria-sort="${direction}">${label}${sortIndicator(state, key)}</button>`;
+    }
+
+    function playerSortButton(key, label) {
+      const direction = playerSort.key === key ? (playerSort.dir === 'asc' ? 'ascending' : 'descending') : 'none';
+      return `<button type="button" class="table-sort-button" onclick="sortPlayers('${key}')" aria-label="Sort by ${label}" aria-sort="${direction}">${label}${sortIndicator(playerSort, key)}</button>`;
+    }
+
+    function sortLeagues(key) {
+      toggleSort(leagueSort, key);
+      renderLeagues(allLeaguesData);
+    }
+
+    function leagueSortValue(lg, key) {
+      const r = lg.myRoster;
+      const wins = r?.settings?.wins || 0;
+      const losses = r?.settings?.losses || 0;
+      const ties = r?.settings?.ties || 0;
+
+      if (key === 'standings') return r?.rank || 9999;
+      if (key === 'record') return (wins + ties * 0.5) / (wins + losses + ties || 1);
+      if (key === 'pf') return calcPF(r?.settings);
+      if (key === 'maxpf') return calcMaxPF(r?.settings);
+      if (key === 'power') return lg.valueBoardRank || 9999;
+      return (lg.name || '').toLowerCase();
+    }
+
+    function toggleLeagueSection(section) {
+      leagueCollapsed[section] = !leagueCollapsed[section];
+      saveUiPreferences();
+
+      const body = document.getElementById(`leagueSectionBody-${section}`);
+      const button = document.getElementById(`leagueSectionToggle-${section}`);
+      const icon = document.getElementById(`leagueSectionIcon-${section}`);
+
+      if (body) body.classList.toggle('collapsed', leagueCollapsed[section]);
+      if (button) button.setAttribute('aria-expanded', String(!leagueCollapsed[section]));
+      if (icon) icon.classList.toggle('collapsed', leagueCollapsed[section]);
+    }
+
     function renderLeagues(leagues) {
       let lineup = [], bestball = [];
       leagues.forEach(lg => {
@@ -912,105 +1562,196 @@
       });
 
       const container = document.getElementById('leaguesContainer');
-      container.innerHTML = '';
 
-      const buildSection = (title, arr) => {
-        if (arr.length === 0) return '';
-        let html = `<div class="section-header">${title} (${arr.length})</div>`;
-        html += `<div class="glass-card"><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0">
-          <thead><tr class="text-secondary small text-uppercase">
-            <th>League</th><th>Standings</th><th>Record</th><th>PF</th><th>Max PF</th><th>Power Ranking</th>
-          </tr></thead><tbody>`;
-        
-        arr.forEach(lg => {
-          const r = lg.myRoster;
-          const wins = r?.settings?.wins || 0;
-          const losses = r?.settings?.losses || 0;
-          const ties = r?.settings?.ties || 0;
-          const record = `${wins}-${losses}${ties > 0 ? '-' + ties : ''}`;
-          
-          const pf = calcPF(r?.settings).toFixed(1);
-          const maxPf = calcMaxPF(r?.settings).toFixed(1);
-          const avatar = lg.avatar ? `https://sleepercdn.com/avatars/thumbs/${lg.avatar}` : 'https://sleepercdn.com/images/v2/default_avatar-512x512.png';
+      const buildSection = (title, key, arr, showSearch = false) => {
+        let filtered = arr.filter(lg =>
+          !leagueSearchTerm || (lg.name || '').toLowerCase().includes(leagueSearchTerm)
+        );
 
-          html += `
-            <tr>
-              <td>
-                <div class="d-flex align-items-center gap-3" style="min-width: 200px;">
-                  <img src="${avatar}" class="avatar-img shadow-sm">
-                  <span class="league-link" onclick="openRoster('${lg.league_id}')">${lg.name}</span>
-                </div>
-              </td>
-              <td>
-                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary fw-bold">
-                  ${lg.myRoster?.rank ? '#' + lg.myRoster.rank : '-'}
-                </span>
-              </td>
-              <td><span class="badge bg-success bg-opacity-25 text-success border border-success">${record}</span></td>
-              <td class="fw-bold">${pf}</td>
-              <td class="text-muted">${maxPf}</td>
-              <td>
-                <span class="badge bg-info bg-opacity-25 text-info border border-info fw-bold">
-                  ${lg.valueBoardRank ? '#' + lg.valueBoardRank : '-'}
-                </span>
-              </td>
-            </tr>`;
+        const dir = leagueSort.dir === 'asc' ? 1 : -1;
+        filtered.sort((a, b) => {
+          const av = leagueSortValue(a, leagueSort.key);
+          const bv = leagueSortValue(b, leagueSort.key);
+          if (typeof av === 'string') return av.localeCompare(bv) * dir;
+          if (av !== bv) return (av - bv) * dir;
+          return (a.name || '').localeCompare(b.name || '');
         });
-        html += `</tbody></table></div></div>`;
-        return html;
+
+        const collapsed = leagueCollapsed[key];
+        const header = `
+          <div class="league-section-header">
+            <button type="button" class="league-section-toggle-btn" id="leagueSectionToggle-${key}" onclick="toggleLeagueSection('${key}')" aria-expanded="${!collapsed}" aria-controls="leagueSectionBody-${key}">
+              <i id="leagueSectionIcon-${key}" class="bi bi-chevron-down league-section-toggle ${collapsed ? 'collapsed' : ''}" aria-hidden="true"></i>
+              <span class="section-header">${title} (${filtered.length})</span>
+            </button>
+            ${showSearch ? `
+              <div class="section-search" onclick="event.stopPropagation()">
+                <div class="input-group">
+                  <span class="input-group-text bg-transparent border-secondary text-muted"><i class="bi bi-search"></i></span>
+                  <input type="search" id="leaguesSearchInput" class="form-control glass-input rounded-start-0"
+                         placeholder="Search leagues..." value="${leagueSearchTerm.replace(/"/g, '&quot;')}" aria-label="Search my leagues" inputmode="search" autocomplete="off">
+                </div>
+              </div>` : ''}
+          </div>`;
+
+        let bodyHtml = '';
+        if (!filtered.length) {
+          bodyHtml = arr.length
+            ? `<div class="glass-card text-center text-muted py-4">No leagues match your search.</div>`
+            : '';
+        } else {
+          bodyHtml = `<div class="glass-card"><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0 sticky-first">
+            <thead><tr class="text-secondary small text-uppercase">
+              <th scope="col">${sortButton(leagueSort, 'league', 'League')}</th>
+              <th scope="col">${sortButton(leagueSort, 'standings', 'Standings')}</th>
+              <th scope="col">${sortButton(leagueSort, 'record', 'Record')}</th>
+              <th scope="col">${sortButton(leagueSort, 'pf', 'PF')}</th>
+              <th scope="col">${sortButton(leagueSort, 'maxpf', 'Max PF')}</th>
+              <th scope="col">${sortButton(leagueSort, 'power', 'Power Ranking')}</th>
+            </tr></thead><tbody>`;
+
+          filtered.forEach(lg => {
+            const r = lg.myRoster;
+            const wins = r?.settings?.wins || 0;
+            const losses = r?.settings?.losses || 0;
+            const ties = r?.settings?.ties || 0;
+            const record = `${wins}-${losses}${ties > 0 ? '-' + ties : ''}`;
+            const pf = calcPF(r?.settings).toFixed(1);
+            const maxPf = calcMaxPF(r?.settings).toFixed(1);
+            const avatar = lg.avatar
+              ? `https://sleepercdn.com/avatars/thumbs/${lg.avatar}`
+              : 'https://sleepercdn.com/images/v2/default_avatar-512x512.png';
+
+            bodyHtml += `
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-3" style="min-width: 205px;">
+                    <img src="${avatar}" class="avatar-img shadow-sm" alt="">
+                    <button type="button" class="league-link-button" onclick="openRoster('${lg.league_id}')">${lg.name}</button>
+                  </div>
+                </td>
+                <td><span class="badge bg-primary bg-opacity-25 text-primary border border-primary fw-bold">${r?.rank ? '#' + r.rank : '-'}</span></td>
+                <td><span class="badge bg-success bg-opacity-25 text-success border border-success">${record}</span></td>
+                <td class="fw-bold">${pf}</td>
+                <td class="text-muted">${maxPf}</td>
+                <td><span class="badge bg-info bg-opacity-25 text-info border border-info fw-bold">${lg.valueBoardRank ? '#' + lg.valueBoardRank : '-'}</span></td>
+              </tr>`;
+          });
+
+          bodyHtml += `</tbody></table></div></div>`;
+        }
+
+        return `${header}
+          <div id="leagueSectionBody-${key}" class="league-section-body ${collapsed ? 'collapsed' : ''}">
+            <div class="league-section-inner">${bodyHtml}</div>
+          </div>`;
       };
 
-      container.innerHTML += buildSection('Lineup Leagues', lineup);
-      container.innerHTML += buildSection('Bestball Leagues', bestball);
+      container.innerHTML =
+        buildSection('Lineup Leagues', 'lineup', lineup, true) +
+        buildSection('BestBall Leagues', 'bestball', bestball, false);
+
+      document.getElementById('leaguesSearchInput')?.addEventListener('input', (e) => {
+        leagueSearchTerm = e.target.value.trim().toLowerCase();
+        renderLeagues(allLeaguesData);
+        const input = document.getElementById('leaguesSearchInput');
+        if (input) {
+          input.focus();
+          input.setSelectionRange(input.value.length, input.value.length);
+        }
+      });
     }
 
-    function renderPlayers(sharesMap, totalLeagues) {
-      const tbody = document.getElementById('playersTableBody');
-      tbody.innerHTML = '';
-
-      const sortedPlayers = Object.entries(sharesMap)
-        .map(([pid, data]) => ({ pid, data }))
-        .sort((a, b) => b.data.count - a.data.count);
-
-      sortedPlayers.forEach(p => {
-        const dbInfo = nflPlayersDb[p.pid];
-        let name = p.pid, pos = 'UNK', team = 'FA', health = 'Active';
+    function getPlayerRows(sharesMap, totalLeagues) {
+      return Object.entries(sharesMap).map(([pid, data]) => {
+        const dbInfo = nflPlayersDb[pid];
+        let name = pid, pos = 'UNK', team = 'FA', health = 'Active';
 
         if (dbInfo) {
           if (dbInfo.position === 'DEF') {
-            name = (dbInfo.first_name + " " + dbInfo.last_name).trim() || dbInfo.team;
+            name = (dbInfo.first_name + ' ' + dbInfo.last_name).trim() || dbInfo.team;
             pos = 'DEF';
           } else if (dbInfo.position === 'PICK') {
             name = dbInfo.full_name;
             pos = 'PICK';
           } else {
-            name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
+            name = dbInfo.full_name || (dbInfo.first_name + ' ' + dbInfo.last_name).trim();
             pos = dbInfo.position || 'UNK';
           }
           team = dbInfo.team || 'FA';
           health = dbInfo.injury_status || 'Active';
         }
 
-        const exposure = ((p.data.count / totalLeagues) * 100).toFixed(1);
+        return {
+          pid, data, name, pos, team, health,
+          exposure: totalLeagues ? (data.count / totalLeagues) * 100 : 0
+        };
+      });
+    }
 
+    function sortPlayers(key) {
+      toggleSort(playerSort, key);
+      renderPlayers(globalPlayerShares, allLeaguesData.length);
+    }
+
+    function renderPlayers(sharesMap, totalLeagues) {
+      const tbody = document.getElementById('playersTableBody');
+      const rows = getPlayerRows(sharesMap, totalLeagues);
+
+      const filtered = rows.filter(p => {
+        if (!playerSearchTerm) return true;
+        return `${p.name} ${p.pos} ${p.team} ${p.data.count} ${p.exposure.toFixed(1)} ${p.health}`
+          .toLowerCase().includes(playerSearchTerm);
+      });
+
+      const dir = playerSort.dir === 'asc' ? 1 : -1;
+      filtered.sort((a, b) => {
+        let av, bv;
+        switch (playerSort.key) {
+          case 'pos': av = a.pos.toLowerCase(); bv = b.pos.toLowerCase(); break;
+          case 'team': av = a.team.toLowerCase(); bv = b.team.toLowerCase(); break;
+          case 'shares': av = a.data.count; bv = b.data.count; break;
+          case 'exposure': av = a.exposure; bv = b.exposure; break;
+          case 'health': av = a.health.toLowerCase(); bv = b.health.toLowerCase(); break;
+          default: av = a.name.toLowerCase(); bv = b.name.toLowerCase();
+        }
+        if (typeof av === 'string') return av.localeCompare(bv) * dir;
+        if (av !== bv) return (av - bv) * dir;
+        return a.name.localeCompare(b.name);
+      });
+
+      const table = document.querySelector('#playersTab table');
+      const header = table?.querySelector('thead tr');
+      if (header) {
+        header.innerHTML = `
+          <th scope="col">${playerSortButton('name', 'Player')}</th>
+          <th scope="col">${playerSortButton('pos', 'Pos')}</th>
+          <th scope="col">${playerSortButton('team', 'Team')}</th>
+          <th scope="col">${playerSortButton('shares', 'Shares')}</th>
+          <th scope="col">${playerSortButton('exposure', 'Exposure')}</th>
+          <th scope="col">${playerSortButton('health', 'Health')}</th>`;
+      }
+
+      tbody.innerHTML = '';
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-5">No players match your search.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(p => {
         let healthColor = 'status-active';
-        if (health === 'Questionable' || health === 'Doubtful') healthColor = 'status-ques';
-        if (health === 'Out' || health === 'IR' || health === 'PUP') healthColor = 'status-out';
+        if (p.health === 'Questionable' || p.health === 'Doubtful') healthColor = 'status-ques';
+        if (p.health === 'Out' || p.health === 'IR' || p.health === 'PUP') healthColor = 'status-out';
 
         tbody.innerHTML += `
           <tr>
-            <td class="fw-bold text-nowrap">${name}</td>
-            <td><span class="badge bg-secondary">${pos}</span></td>
-            <td>${team}</td>
-            <td>
-              <a href="javascript:void(0)" class="fw-bold text-info fs-5 text-decoration-none" onclick="openSharesModal('${p.pid}')">
-                ${p.data.count}
-              </a>
-            </td>
-            <td>${exposure}%</td>
-            <td class="fw-semibold ${healthColor}">${health}</td>
-          </tr>
-        `;
+            <td class="fw-bold text-nowrap">${p.name}</td>
+            <td><span class="badge bg-secondary">${p.pos}</span></td>
+            <td>${p.team}</td>
+            <td><button type="button" class="btn btn-link p-0 fw-bold text-info fs-5 text-decoration-none align-baseline" onclick="openSharesModal('${p.pid}')">${p.data.count}</button></td>
+            <td>${p.exposure.toFixed(1)}%</td>
+            <td class="fw-semibold ${healthColor}">${p.health}</td>
+          </tr>`;
       });
     }
 
@@ -1121,50 +1862,44 @@
       }
     }
 
-    async function renderValueBoard() {
+    function renderValueBoard() {
       const leagueId = document.getElementById('boardLeagueSelect').value;
       const container = document.getElementById('valueBoardContent');
-      
+
       if (!leagueId) {
         container.innerHTML = '<div class="text-center text-muted py-5">Select a league above to load the board.</div>';
         return;
       }
 
       const lg = allLeaguesData.find(l => l.league_id === leagueId);
-      container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+      if (!lg) {
+        container.innerHTML = '<div class="text-danger py-5 text-center">League data is unavailable.</div>';
+        return;
+      }
 
       try {
-        const usersRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`);
-        const users = await usersRes.json();
-        
-        const userMap = {};
-        users.forEach(u => userMap[u.user_id] = u.display_name);
-
-        let teamValues = [];
-
-        lg.allRosters.forEach(roster => {
+        const userMap = lg.userMap || {};
+        const teamValues = (lg.allRosters || []).map(roster => {
           const totalValue = getRosterMarketValue(roster);
-
           let ownerName = userMap[roster.owner_id] || 'Unknown';
           if (roster.co_owners) {
-             const coOwnerNames = roster.co_owners.map(id => userMap[id] || 'Unknown').join(' & ');
-             ownerName += ` / ${coOwnerNames}`;
+            const coOwnerNames = roster.co_owners.map(id => userMap[id] || 'Unknown').join(' & ');
+            ownerName += ` / ${coOwnerNames}`;
           }
 
-          teamValues.push({
+          return {
             owner: ownerName,
             wins: roster.settings?.wins || 0,
             losses: roster.settings?.losses || 0,
+            ties: roster.settings?.ties || 0,
             value: totalValue,
             roster_id: roster.roster_id
-          });
-        });
+          };
+        }).sort((a, b) => b.value - a.value);
 
-        teamValues.sort((a, b) => b.value - a.value);
-
-        let html = `<table class="table table-dark table-hover align-middle mt-3">
+        let html = `<table class="table table-dark table-hover align-middle mt-3 sticky-first">
           <thead><tr class="text-secondary small text-uppercase">
-            <th>Rank</th><th>Manager</th><th>Record</th><th class="text-end">Total Market Value</th>
+            <th scope="col">Rank</th><th scope="col">Manager</th><th scope="col">Record</th><th scope="col" class="text-end">Total Market Value</th>
           </tr></thead><tbody>`;
 
         teamValues.forEach((t, index) => {
@@ -1172,16 +1907,15 @@
             <tr>
               <td class="fw-bold text-muted">#${index + 1}</td>
               <td class="fw-bold text-white text-nowrap">${t.owner}</td>
-              <td>${t.wins}-${t.losses}</td>
+              <td>${t.wins}-${t.losses}${t.ties ? `-${t.ties}` : ''}</td>
               <td class="text-end fw-bold text-info fs-5">${t.value.toLocaleString()}</td>
-            </tr>
-          `;
+            </tr>`;
         });
+
         html += `</tbody></table>`;
         container.innerHTML = html;
-
-      } catch(err) {
-        container.innerHTML = '<div class="text-danger py-5 text-center">Failed to load league data.</div>';
+      } catch (err) {
+        container.innerHTML = '<div class="text-danger py-5 text-center">Failed to render league value data.</div>';
       }
     }
 
