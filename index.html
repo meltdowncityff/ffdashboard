@@ -784,9 +784,140 @@
         font-size: 1.0rem;
       }
 
-      .table-responsive {
-        overflow-x: auto;
-        overscroll-behavior-x: contain;
+      /* Compact mobile cards: no forced horizontal scroll for the two main dashboards. */
+      #leaguesTab .table-responsive,
+      #playersTab .table-responsive {
+        overflow-x: visible;
+        overflow-y: visible;
+        overscroll-behavior-x: auto;
+      }
+
+      #leaguesTab .sticky-first,
+      #playersTab .sticky-first {
+        min-width: 0 !important;
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      #leaguesTab .sticky-first thead,
+      #playersTab .sticky-first thead {
+        display: none;
+      }
+
+      #leaguesTab .sticky-first tbody tr,
+      #playersTab .sticky-first tbody tr {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.1rem 0.4rem;
+        padding: 0.8rem 0.65rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+      }
+
+      #leaguesTab .sticky-first tbody tr:last-child,
+      #playersTab .sticky-first tbody tr:last-child {
+        border-bottom: 0;
+      }
+
+      #leaguesTab .sticky-first tbody td,
+      #playersTab .sticky-first tbody td {
+        position: static !important;
+        left: auto !important;
+        z-index: auto !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-width: 0;
+        width: auto !important;
+        padding: 0.48rem 0.12rem !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      #leaguesTab .sticky-first tbody td:first-child,
+      #playersTab .sticky-first tbody td:first-child {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.6rem;
+        width: 100% !important;
+        padding: 0.05rem 0 0.65rem !important;
+        margin-bottom: 0.1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.055) !important;
+        text-align: left;
+      }
+
+      #leaguesTab .sticky-first tbody td:not(:first-child)::before,
+      #playersTab .sticky-first tbody td:not(:first-child)::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 0.2rem;
+        color: #64748b;
+        font-size: 0.62rem;
+        line-height: 1.1;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      #leaguesTab .sticky-first .league-cell,
+      #leaguesTab .sticky-first .league-cell .d-flex {
+        min-width: 0 !important;
+        width: 100%;
+      }
+
+      #leaguesTab .sticky-first .league-cell .d-flex {
+        gap: 0.6rem !important;
+      }
+
+      #leaguesTab .sticky-first .league-link-button {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.92rem;
+        line-height: 1.2;
+      }
+
+      #playersTab .sticky-first tbody td:first-child .fw-bold {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.92rem;
+      }
+
+      #leaguesTab .sticky-first .badge,
+      #playersTab .sticky-first .badge {
+        font-size: 0.72rem;
+        white-space: nowrap;
+      }
+
+      #leaguesTab .sticky-first tbody td.fw-bold,
+      #playersTab .sticky-first tbody td.fw-bold {
+        font-size: 0.84rem;
+      }
+
+      /* Keep the section heading/search comfortable on narrow screens. */
+      .league-section-header,
+      .players-section-header {
+        margin-bottom: 0.55rem;
+      }
+
+      .league-section-toggle-btn .section-header {
+        font-size: 0.98rem;
+      }
+
+      .section-search,
+      .players-section-header .section-search {
+        width: 100%;
       }
 
       .sticky-first thead th:first-child,
@@ -806,18 +937,15 @@
         box-shadow: 3px 0 10px rgba(0, 0, 0, 0.20);
       }
 
-      #leaguesTab .sticky-first {
-        min-width: 760px;
-      }
-
-      #playersTab .sticky-first {
-        min-width: 690px;
-      }
-
       .avatar-img {
         width: 34px;
         height: 34px;
         border-radius: 9px;
+      }
+
+      #leaguesTab .table tbody td,
+      #playersTab .table tbody td {
+        font-size: 0.83rem;
       }
 
       .table thead th {
@@ -1624,17 +1752,17 @@
 
             bodyHtml += `
               <tr>
-                <td>
+                <td class="league-cell">
                   <div class="d-flex align-items-center gap-3" style="min-width: 205px;">
                     <img src="${avatar}" class="avatar-img shadow-sm" alt="">
                     <button type="button" class="league-link-button" onclick="openRoster('${lg.league_id}')">${lg.name}</button>
                   </div>
                 </td>
-                <td><span class="badge bg-primary bg-opacity-25 text-primary border border-primary fw-bold">${r?.rank ? '#' + r.rank : '-'}</span></td>
-                <td><span class="badge bg-success bg-opacity-25 text-success border border-success">${record}</span></td>
-                <td class="fw-bold">${pf}</td>
-                <td class="text-muted">${maxPf}</td>
-                <td><span class="badge bg-info bg-opacity-25 text-info border border-info fw-bold">${lg.valueBoardRank ? '#' + lg.valueBoardRank : '-'}</span></td>
+                <td data-label="Standings"><span class="badge bg-primary bg-opacity-25 text-primary border border-primary fw-bold">${r?.rank ? '#' + r.rank : '-'}</span></td>
+                <td data-label="Record"><span class="badge bg-success bg-opacity-25 text-success border border-success fw-bold">${record}</span></td>
+                <td data-label="PF" class="fw-bold">${pf}</td>
+                <td data-label="Max PF" class="text-muted">${maxPf}</td>
+                <td data-label="Power Ranking"><span class="badge bg-info bg-opacity-25 text-info border border-info fw-bold">${lg.valueBoardRank ? '#' + lg.valueBoardRank : '-'}</span></td>
               </tr>`;
           });
 
@@ -1746,11 +1874,11 @@
         tbody.innerHTML += `
           <tr>
             <td class="fw-bold text-nowrap">${p.name}</td>
-            <td><span class="badge bg-secondary">${p.pos}</span></td>
-            <td>${p.team}</td>
-            <td><button type="button" class="btn btn-link p-0 fw-bold text-info fs-5 text-decoration-none align-baseline" onclick="openSharesModal('${p.pid}')">${p.data.count}</button></td>
-            <td>${p.exposure.toFixed(1)}%</td>
-            <td class="fw-semibold ${healthColor}">${p.health}</td>
+            <td data-label="Pos"><span class="badge bg-secondary">${p.pos}</span></td>
+            <td data-label="Team">${p.team}</td>
+            <td data-label="Shares"><button type="button" class="btn btn-link p-0 fw-bold text-info fs-5 text-decoration-none align-baseline" onclick="openSharesModal('${p.pid}')">${p.data.count}</button></td>
+            <td data-label="Exposure">${p.exposure.toFixed(1)}%</td>
+            <td data-label="Health" class="fw-semibold ${healthColor}">${p.health}</td>
           </tr>`;
       });
     }
