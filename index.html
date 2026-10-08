@@ -972,6 +972,49 @@
       }
     }
 
+
+
+    /* ===== Control Center ===== */
+    .cc-toolbar { display:flex; flex-wrap:wrap; gap:.75rem; align-items:center; justify-content:space-between; }
+    .cc-stat { height:100%; padding:1rem; border:1px solid var(--border-subtle); border-radius:14px; background:rgba(255,255,255,.025); }
+    .cc-stat-label { color:#64748b; font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .cc-stat-value { margin-top:.18rem; font-family:'Plus Jakarta Sans',sans-serif; font-size:1.55rem; font-weight:800; color:#f8fafc; }
+    .cc-stat-sub { margin-top:.12rem; color:#94a3b8; font-size:.72rem; }
+    .cc-section-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1rem; font-weight:800; color:#f8fafc; }
+    .cc-action { display:flex; gap:.8rem; align-items:flex-start; padding:.8rem .9rem; border:1px solid var(--border-subtle); border-radius:12px; background:rgba(255,255,255,.025); }
+    .cc-action-icon { width:34px; height:34px; flex:0 0 34px; display:grid; place-items:center; border-radius:10px; background:rgba(99,102,241,.12); color:#a5b4fc; }
+    .cc-action-title { font-weight:750; font-size:.86rem; color:#f8fafc; }
+    .cc-action-text { color:#94a3b8; font-size:.75rem; line-height:1.45; margin-top:.12rem; }
+    .cc-league-row { display:grid; grid-template-columns:minmax(0,2.2fr) repeat(4,minmax(72px,1fr)); gap:.5rem; align-items:center; padding:.78rem .7rem; border-bottom:1px solid rgba(255,255,255,.055); }
+    .cc-league-row:last-child { border-bottom:0; }
+    .cc-mini-label { color:#64748b; font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+    .cc-mini-value { color:#e2e8f0; font-size:.8rem; font-weight:700; }
+    .cc-player-row { display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:.68rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .cc-player-row:last-child { border-bottom:0; }
+    .cc-player-main { min-width:0; }
+    .cc-player-name { color:#f8fafc; font-weight:750; font-size:.83rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cc-player-meta { color:#64748b; font-size:.68rem; margin-top:.1rem; }
+    .cc-player-value { color:#7dd3fc; font-weight:800; font-size:.82rem; white-space:nowrap; }
+    .cc-badge { display:inline-flex; align-items:center; gap:.25rem; padding:.18rem .45rem; border-radius:999px; font-size:.63rem; font-weight:800; }
+    .cc-badge-good { color:#6ee7b7; background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.2); }
+    .cc-badge-warn { color:#fcd34d; background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.2); }
+    .cc-badge-neutral { color:#cbd5e1; background:rgba(148,163,184,.08); border:1px solid rgba(148,163,184,.15); }
+    .cc-empty { padding:2rem 1rem; text-align:center; color:#64748b; }
+    .cc-note { color:#64748b; font-size:.68rem; line-height:1.5; }
+    .cc-trade { padding:.7rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .cc-trade:last-child { border-bottom:0; }
+    .cc-trade-head { display:flex; justify-content:space-between; gap:.75rem; font-size:.72rem; }
+    .cc-trade-title { color:#e2e8f0; font-weight:750; }
+    .cc-trade-date { color:#64748b; white-space:nowrap; }
+    .cc-trade-assets { color:#94a3b8; font-size:.68rem; margin-top:.22rem; line-height:1.45; }
+    .cc-refresh-spin { animation: ccSpin .9s linear infinite; }
+    @keyframes ccSpin { to { transform:rotate(360deg); } }
+    @media (max-width: 700px) {
+      .cc-league-row { grid-template-columns:1fr 1fr; gap:.55rem .8rem; }
+      .cc-league-row > :first-child { grid-column:1 / -1; }
+      .cc-player-row { padding:.62rem 0; }
+    }
+
   </style>
 </head>
 <body>
@@ -1002,6 +1045,7 @@
       <button class="custom-tab" onclick="switchTab('playersTab', this)">My Players</button>
       <button class="custom-tab" onclick="switchTab('analyzerTab', this)">Trade Analyzer</button>
       <button class="custom-tab" onclick="switchTab('valueBoardTab', this)">League Value Board</button>
+      <button class="custom-tab" onclick="switchTab('controlCenterTab', this)"><i class="bi bi-speedometer2 me-1"></i>Control Center</button>
     </div>
 
     <!-- Loading State -->
@@ -1065,7 +1109,7 @@
         <div class="row text-center mb-4">
           <div class="col-12">
             <h4 class="fw-bold text-white mb-2" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.02em;">Dynasty Trade Analyzer</h4>
-            <p class="text-muted small mb-0">Values powered by FantasyCalc (Superflex / 12-Team / 1 PPR / TEP+)</p>
+            <p class="text-muted small mb-0">Blended market value • FantasyCalc + Stats Guy + Dynasty Dealer</p>
           </div>
         </div>
         
@@ -1100,7 +1144,10 @@
         </div>
 
         <div class="text-center mt-5 pt-4 border-top border-secondary border-opacity-25">
-          <h3 class="fw-bold mb-2" id="tradeVerdict" style="font-family: 'Plus Jakarta Sans', sans-serif;">Add players to evaluate</h3>
+          <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+            <h3 class="fw-bold mb-0" id="tradeVerdict" style="font-family: 'Plus Jakarta Sans', sans-serif;">Add players to evaluate</h3>
+            <button type="button" id="clearTradeBtn" class="btn btn-sm btn-outline-secondary" onclick="clearTradeAnalyzer()" disabled><i class="bi bi-x-lg me-1"></i>Clear</button>
+          </div>
           <p class="text-muted fs-5 mb-0" id="tradeDiff"></p>
         </div>
       </div>
@@ -1123,6 +1170,29 @@
 
         <div id="valueBoardContent" class="table-responsive">
           <div class="text-center text-muted py-5">Select a league above to load the board.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 5: Control Center -->
+    <div id="controlCenterTab" class="tab-content">
+      <div class="glass-card p-3 p-md-4">
+        <div class="cc-toolbar mb-4">
+          <div>
+            <div class="cc-section-title fs-5">Sleeper Control Center</div>
+            <div class="text-muted small mt-1">Portfolio-level dynasty intelligence across all of your loaded leagues.</div>
+          </div>
+          <button id="ccRefreshBtn" class="btn btn-outline-light btn-sm" onclick="refreshControlCenter(true)">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+          </button>
+        </div>
+
+        <div id="controlCenterContent">
+          <div class="cc-empty">
+            <i class="bi bi-speedometer2 fs-1 d-block mb-2 opacity-50"></i>
+            Load your Sleeper data first, then open this tab.
+          </div>
         </div>
       </div>
     </div>
@@ -1191,6 +1261,8 @@
     let playerSort = { key: 'shares', dir: 'desc' };
     let leagueUserCache = {};
     let isLoading = false;
+    let currentSeason = String(new Date().getMonth() < 2 ? new Date().getFullYear() - 1 : new Date().getFullYear());
+    let controlCenterState = { loaded: false, loading: false, data: null, lastRefresh: null };
 
     function loadUiPreferences() {
       try {
@@ -1216,6 +1288,7 @@
         <option value="${currentYear}">${currentYear}</option>
         <option value="${currentYear - 1}">${currentYear - 1}</option>
       `;
+      currentSeason = String(currentYear);
 
       const savedUser = localStorage.getItem('sleeper_username');
       const savedSeason = localStorage.getItem('sleeper_season');
@@ -1230,6 +1303,12 @@
       document.getElementById('playersSearchInput')?.addEventListener('input', (e) => {
         playerSearchTerm = e.target.value.trim().toLowerCase();
         renderPlayers(globalPlayerShares, allLeaguesData.length);
+      });
+
+      ['A','B'].forEach(side => {
+        document.getElementById(`inputSide${side}`)?.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); addPlayerToTrade(side); }
+        });
       });
     });
 
@@ -1270,6 +1349,9 @@
       document.querySelectorAll('.custom-tab').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       btnElement.classList.add('active');
+      if (tabId === 'controlCenterTab' && allLeaguesData.length) {
+        refreshControlCenter(false);
+      }
     }
 
     function showLoading(text, subtext = 'Preparing your dashboard...') {
@@ -1474,6 +1556,7 @@
 
       const username = document.getElementById('usernameInput').value.trim();
       const season = document.getElementById('seasonSelect').value;
+      currentSeason = String(season);
       if (!username) return alert('Enter a username.');
 
       isLoading = true;
@@ -1495,7 +1578,11 @@
         // Player data and market values are independent of league loading, so fetch them together.
         showLoading('Preparing player data...', 'Loading the NFL database and market values in parallel.');
         if (!isDbLoaded) {
-          await Promise.all([loadPlayerDatabase(), fetchMarketValueApi()]);
+          const sharedResults = await Promise.allSettled([loadPlayerDatabase(), fetchMarketValueApi()]);
+          const dbResult = sharedResults[0];
+          const marketResult = sharedResults[1];
+          if (dbResult.status === 'rejected') console.warn('Player database load failed:', dbResult.reason);
+          if (marketResult.status === 'rejected') console.warn('Market value load failed:', marketResult.reason);
           buildSearchDatalist();
         }
         setLoadingProgress(25);
@@ -1570,6 +1657,8 @@
 
         renderLeagues(allLeaguesData);
         renderPlayers(globalPlayerShares, allLeaguesData.length);
+        controlCenterState = { loaded: false, loading: false, data: null, lastRefresh: null };
+        document.getElementById('controlCenterContent').innerHTML = '<div class="cc-empty"><i class="bi bi-speedometer2 fs-1 d-block mb-2 opacity-50"></i>Open this tab to scan your loaded leagues.</div>';
 
         hideLoading();
       } catch (err) {
@@ -1583,6 +1672,44 @@
       }
     });
 
+    function getPlayerDisplayName(pid) {
+      const p = nflPlayersDb[pid];
+      if (!p) return pid;
+      if (p.position === 'PICK') return p.full_name || pid;
+      if (p.position === 'DEF') return `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.team || pid;
+      return p.full_name || `${p.first_name || ''} ${p.last_name || ''}`.trim() || pid;
+    }
+
+    function getPlayerPosition(pid) {
+      return nflPlayersDb[pid]?.position || '';
+    }
+
+    function getPlayerMarketValue(pid) {
+      const direct = marketValues[pid];
+      if (direct) {
+        const avg = Number(direct.avg || 0);
+        if (avg > 0) return avg;
+        const vals = [direct.fc, direct.sg, direct.dd].map(Number).filter(v => v > 0);
+        if (vals.length) return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+      }
+
+      const name = getPlayerDisplayName(pid);
+      const key = `name_${name.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+      const fallback = Number(marketValues[key] || 0);
+      return fallback > 0 ? fallback : 0;
+    }
+
+    function getRosterPositionValues(roster) {
+      const totals = { QB:0, RB:0, WR:0, TE:0, K:0, DEF:0, PICK:0, OTHER:0 };
+      (roster?.players || []).forEach(pid => {
+        if (pid === '0') return;
+        const pos = getPlayerPosition(pid);
+        const key = Object.prototype.hasOwnProperty.call(totals, pos) ? pos : 'OTHER';
+        totals[key] += getPlayerMarketValue(pid);
+      });
+      return totals;
+    }
+
     // Calculate a roster's total market value using the same logic as the League Value Board.
     function getRosterMarketValue(roster) {
       let totalValue = 0;
@@ -1592,23 +1719,7 @@
       roster.players.forEach(pid => {
         if (pid === "0") return;
 
-        let val = (marketValues[pid] && marketValues[pid].avg > 0) ? marketValues[pid].avg : 0;
-
-        if (val === 0 && nflPlayersDb[pid]) {
-          const dbInfo = nflPlayersDb[pid];
-          let searchName = "";
-
-          if (dbInfo.position === 'PICK') searchName = dbInfo.full_name;
-          else if (dbInfo.position === 'DEF') searchName = (dbInfo.first_name + " " + dbInfo.last_name).trim();
-          else searchName = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
-
-          const nameKey = searchName.toLowerCase().replace(/[^a-z0-9]/g, '');
-          if (marketValues[`name_${nameKey}`]) {
-            val = marketValues[`name_${nameKey}`];
-          }
-        }
-
-        totalValue += val;
+        totalValue += getPlayerMarketValue(pid);
       });
 
       return totalValue;
@@ -1894,8 +2005,7 @@
       if (!pid) {
         const lowerVal = val.toLowerCase();
         for (const id in nflPlayersDb) {
-          const p = nflPlayersDb[id];
-          const name = (p.position === 'PICK' ? p.full_name : (p.full_name || (p.first_name + " " + p.last_name))).toLowerCase();
+          const name = getPlayerDisplayName(id).toLowerCase();
           if (name === lowerVal || name.includes(lowerVal) || lowerVal.includes(name)) {
             pid = id;
             break;
@@ -1903,11 +2013,13 @@
         }
       }
 
-      if (!pid) return alert("Please select a valid player or pick from the dropdown.");
+      if (!pid || !nflPlayersDb[pid]) return alert('Please select a valid player or pick from the dropdown.');
 
-      if (side === 'A' && !tradeSideA.includes(pid)) tradeSideA.push(pid);
-      if (side === 'B' && !tradeSideB.includes(pid)) tradeSideB.push(pid);
-      
+      const ownSide = side === 'A' ? tradeSideA : tradeSideB;
+      const otherSide = side === 'A' ? tradeSideB : tradeSideA;
+      if (otherSide.includes(pid)) return alert(`${getPlayerDisplayName(pid)} is already on the other side of the trade.`);
+      if (!ownSide.includes(pid)) ownSide.push(pid);
+
       input.value = '';
       updateTradeAnalyzer();
     }
@@ -1918,48 +2030,45 @@
       updateTradeAnalyzer();
     }
 
+    function clearTradeAnalyzer() {
+      tradeSideA = [];
+      tradeSideB = [];
+      document.getElementById('inputSideA').value = '';
+      document.getElementById('inputSideB').value = '';
+      updateTradeAnalyzer();
+    }
+
     function updateTradeAnalyzer() {
       let totalA = 0;
       let totalB = 0;
 
       const renderSide = (arr, side) => {
+        const target = document.getElementById(side === 'A' ? 'listSideA' : 'listSideB');
+        if (!arr.length) {
+          target.innerHTML = '<div class="text-muted small text-center py-4">Add players or picks to this side.</div>';
+          return;
+        }
+
         let html = '';
         arr.forEach(pid => {
           const dbInfo = nflPlayersDb[pid];
-          let name = pid, pos = '';
-          if (dbInfo) {
-            if (dbInfo.position === 'PICK') { name = dbInfo.full_name; pos = 'PICK'; }
-            else if (dbInfo.position === 'DEF') { name = (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = 'DEF'; }
-            else { name = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim(); pos = dbInfo.position || ''; }
-          }
-
-          let val = (marketValues[pid] && marketValues[pid].fc) ? marketValues[pid].fc : 0;
-          
-          if (val === 0 && dbInfo) {
-            let searchName = "";
-            if (dbInfo.position === 'PICK') searchName = dbInfo.full_name;
-            else if (dbInfo.position === 'DEF') searchName = (dbInfo.first_name + " " + dbInfo.last_name).trim();
-            else searchName = dbInfo.full_name || (dbInfo.first_name + " " + dbInfo.last_name).trim();
-            
-            const nameKey = searchName.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (marketValues[`name_${nameKey}`]) {
-              val = marketValues[`name_${nameKey}`];
-            }
-          }
-          
+          const name = getPlayerDisplayName(pid);
+          const pos = getPlayerPosition(pid);
+          const val = getPlayerMarketValue(pid);
           if (side === 'A') totalA += val;
-          if (side === 'B') totalB += val;
+          else totalB += val;
 
+          const valueLabel = val > 0 ? val.toLocaleString() : 'N/A';
           html += `
             <div class="player-pill">
-              <div><span class="fw-bold">${name}</span> <span class="badge bg-secondary ms-1">${pos}</span></div>
+              <div class="min-w-0"><span class="fw-bold">${name}</span> <span class="badge bg-secondary ms-1">${pos || 'ASSET'}</span></div>
               <div class="d-flex align-items-center gap-3">
-                <span class="text-info fw-semibold fs-5">${val.toLocaleString()}</span>
-                <i class="bi bi-x-circle-fill remove-btn" onclick="removePlayerFromTrade('${side}', '${pid}')"></i>
+                <span class="text-info fw-semibold fs-5">${valueLabel}</span>
+                <button type="button" class="btn btn-link text-danger p-0 remove-btn" aria-label="Remove ${name}" onclick="removePlayerFromTrade('${side}', '${pid}')"><i class="bi bi-x-circle-fill"></i></button>
               </div>
             </div>`;
         });
-        document.getElementById(side === 'A' ? 'listSideA' : 'listSideB').innerHTML = html;
+        target.innerHTML = html;
       };
 
       renderSide(tradeSideA, 'A');
@@ -1970,24 +2079,28 @@
 
       const verdictEl = document.getElementById('tradeVerdict');
       const diffEl = document.getElementById('tradeDiff');
+      const clearBtn = document.getElementById('clearTradeBtn');
+      if (clearBtn) clearBtn.disabled = !tradeSideA.length && !tradeSideB.length;
 
       if (totalA === 0 && totalB === 0) {
-        verdictEl.innerText = "Add players to evaluate";
-        verdictEl.className = "fw-bold mb-2";
-        diffEl.innerText = "";
-      } else if (totalA > totalB) {
-        verdictEl.innerText = "Team A Favored";
-        verdictEl.className = "fw-bold mb-2 text-success";
-        diffEl.innerText = `Difference: ${(totalA - totalB).toLocaleString()} pts`;
-      } else if (totalB > totalA) {
-        verdictEl.innerText = "Team B Favored";
-        verdictEl.className = "fw-bold mb-2 text-success";
-        diffEl.innerText = `Difference: ${(totalB - totalA).toLocaleString()} pts`;
-      } else {
-        verdictEl.innerText = "Perfectly Balanced";
-        verdictEl.className = "fw-bold mb-2 text-warning";
-        diffEl.innerText = "Difference: 0 pts";
+        verdictEl.innerText = 'Add players to evaluate';
+        verdictEl.className = 'fw-bold mb-2';
+        diffEl.innerText = 'Using the same blended market values as the League Value Board.';
+        return;
       }
+
+      const maxTotal = Math.max(totalA, totalB);
+      const diff = Math.abs(totalA - totalB);
+      const pct = maxTotal ? (diff / maxTotal) * 100 : 0;
+      let label = 'Perfectly Balanced';
+      let cls = 'fw-bold mb-2 text-warning';
+      if (pct > 10) { label = totalA > totalB ? 'Team A Strongly Favored' : 'Team B Strongly Favored'; cls = 'fw-bold mb-2 text-danger'; }
+      else if (pct > 5) { label = totalA > totalB ? 'Team A Favored' : 'Team B Favored'; cls = 'fw-bold mb-2 text-success'; }
+      else if (pct > 2) { label = totalA > totalB ? 'Slight Team A Edge' : 'Slight Team B Edge'; cls = 'fw-bold mb-2 text-info'; }
+
+      verdictEl.innerText = label;
+      verdictEl.className = cls;
+      diffEl.innerText = `Difference: ${diff.toLocaleString()} points (${pct.toFixed(1)}%) • A ${totalA.toLocaleString()} vs B ${totalB.toLocaleString()}`;
     }
 
     function renderValueBoard() {
@@ -2044,6 +2157,203 @@
         container.innerHTML = html;
       } catch (err) {
         container.innerHTML = '<div class="text-danger py-5 text-center">Failed to render league value data.</div>';
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    }
+
+    function getOwnerNameForRoster(lg, rosterId) {
+      const roster = (lg.allRosters || []).find(r => Number(r.roster_id) === Number(rosterId));
+      if (!roster) return 'Unknown team';
+      const names = [roster.owner_id, ...(roster.co_owners || [])].filter(Boolean).map(id => lg.userMap?.[id] || 'Unknown');
+      return names.join(' / ') || 'Unknown team';
+    }
+
+    function formatControlDate(timestamp) {
+      if (!timestamp) return '';
+      try { return new Date(Number(timestamp)).toLocaleDateString(undefined, { month:'short', day:'numeric' }); }
+      catch (e) { return ''; }
+    }
+
+    function formatPick(pick) {
+      return `${pick.season} ${['','1st','2nd','3rd','4th'][Number(pick.round)] || `R${pick.round}`}`;
+    }
+
+    async function fetchLeagueControlData(lg, weeks) {
+      const pickPromise = fetchJson(`https://api.sleeper.app/v1/league/${lg.league_id}/traded_picks`).catch(() => []);
+      const txPromises = weeks.map(week => fetchJson(`https://api.sleeper.app/v1/league/${lg.league_id}/transactions/${week}`).catch(() => []));
+      const [picks, ...txChunks] = await Promise.all([pickPromise, ...txPromises]);
+      const transactions = txChunks.flat().filter(Boolean);
+      const myRosterId = lg.myRoster?.roster_id;
+      const rosterValues = (lg.allRosters || []).map(r => ({ roster_id:r.roster_id, value:getRosterMarketValue(r) })).sort((a,b)=>b.value-a.value);
+      const valueRank = rosterValues.findIndex(r => Number(r.roster_id) === Number(myRosterId)) + 1;
+      const posValues = getRosterPositionValues(lg.myRoster);
+      const starterSet = new Set(lg.myRoster?.starters || []);
+      const starterValue = (lg.myRoster?.players || []).filter(pid => starterSet.has(pid)).reduce((sum,pid)=>sum+getPlayerMarketValue(pid),0);
+      const benchValue = Math.max(0, getRosterMarketValue(lg.myRoster) - starterValue);
+
+      const myTrades = transactions.filter(t => t.status === 'complete' && t.type === 'trade' && (t.roster_ids || []).some(id => Number(id) === Number(myRosterId)));
+      const recentTrades = transactions.filter(t => t.status === 'complete' && t.type === 'trade');
+      const ownedPicks = (Array.isArray(picks) ? picks : []).filter(p => Number(p.owner_id) === Number(myRosterId) && String(p.season) >= String(currentSeason));
+
+      const rostered = new Set((lg.allRosters || []).flatMap(r => r.players || []).map(String));
+      const available = Object.keys(nflPlayersDb)
+        .filter(pid => !rostered.has(String(pid)))
+        .map(pid => ({ pid, value:getPlayerMarketValue(pid), pos:getPlayerPosition(pid), name:getPlayerDisplayName(pid) }))
+        .filter(p => ['QB','RB','WR','TE'].includes(p.pos) && p.value > 0 && nflPlayersDb[p.pid]?.status !== 'Inactive')
+        .sort((a,b)=>b.value-a.value)
+        .slice(0, 8);
+
+      return {
+        league: lg,
+        myRosterId,
+        valueRank,
+        rosterCount: (lg.allRosters || []).length,
+        value: getRosterMarketValue(lg.myRoster),
+        posValues,
+        starterValue,
+        benchValue,
+        record: `${lg.myRoster?.settings?.wins || 0}-${lg.myRoster?.settings?.losses || 0}${lg.myRoster?.settings?.ties ? `-${lg.myRoster.settings.ties}` : ''}`,
+        standingsRank: lg.myRoster?.rank || null,
+        myTrades: myTrades.sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,5),
+        recentTrades: recentTrades.sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,5),
+        ownedPicks,
+        available
+      };
+    }
+
+    function buildControlCenterData(leagueData, nflState) {
+      const totalValue = leagueData.reduce((sum,x)=>sum+x.value,0);
+      const avgValueRank = leagueData.length ? leagueData.reduce((sum,x)=>sum+(x.valueRank || leagueData.length),0)/leagueData.length : 0;
+      const contenders = leagueData.filter(x => x.standingsRank && x.standingsRank <= Math.ceil(x.rosterCount/2) && x.valueRank && x.valueRank <= Math.ceil(x.rosterCount/2)).length;
+      const rebuilds = leagueData.filter(x => x.standingsRank && x.standingsRank > Math.ceil(x.rosterCount/2) && x.valueRank && x.valueRank > Math.ceil(x.rosterCount/2)).length;
+      const recentTrades = leagueData.flatMap(x => x.recentTrades.map(t => ({...t, league:x.league}))).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,10);
+
+      const exposure = {};
+      (allLeaguesData || []).forEach(lg => {
+        (lg.myRoster?.players || []).forEach(pid => {
+          if (pid === '0') return;
+          if (!exposure[pid]) exposure[pid] = { count:0, leagues:[] };
+          exposure[pid].count++;
+          exposure[pid].leagues.push(lg.name);
+        });
+      });
+      const mostExposed = Object.entries(exposure).map(([pid,d])=>({pid,...d,value:getPlayerMarketValue(pid)})).sort((a,b)=>b.count-a.count || b.value-a.value).slice(0,6);
+
+      const actions = [];
+      leagueData.forEach(x => {
+        const half = Math.ceil(x.rosterCount/2);
+        if (x.standingsRank && x.valueRank && x.standingsRank <= half && x.valueRank <= half) actions.push({icon:'bi-fire',title:`Contender: ${x.league.name}`,text:`You are ${x.standingsRank}/${x.rosterCount} in the standings and ${x.valueRank}/${x.rosterCount} by market value.`});
+        else if (x.standingsRank && x.valueRank && x.standingsRank > half && x.valueRank <= half) actions.push({icon:'bi-graph-up-arrow',title:`Buy window: ${x.league.name}`,text:`Your roster ranks ${x.valueRank} by value but ${x.standingsRank} in the standings. You may be underperforming.`});
+        else if (x.standingsRank && x.valueRank && x.standingsRank <= half && x.valueRank > half) actions.push({icon:'bi-exclamation-triangle',title:`Fragile contender: ${x.league.name}`,text:`The standings are ahead of the roster's market value. Protect this season without overpaying.`});
+        else if (x.standingsRank && x.valueRank && x.standingsRank > half && x.valueRank > half) actions.push({icon:'bi-arrow-down-right',title:`Rebuild candidate: ${x.league.name}`,text:`Both standings and market value are below the league midpoint. Future picks and younger assets deserve extra weight.`});
+      });
+      if (mostExposed[0]?.count > Math.max(1, Math.floor(leagueData.length/2))) actions.push({icon:'bi-collection',title:`High exposure: ${getPlayerDisplayName(mostExposed[0].pid)}`,text:`You roster this player in ${mostExposed[0].count} of ${leagueData.length} leagues. Consider diversification if his value moves sharply.`});
+      if (!actions.length) actions.push({icon:'bi-check2-circle',title:'No major flags',text:'Your loaded leagues do not currently trigger the Control Center\'s basic contender/rebuild rules.'});
+
+      return { leagueData, nflState, totalValue, avgValueRank, contenders, rebuilds, recentTrades, mostExposed, actions:actions.slice(0,8) };
+    }
+
+    function renderControlCenter(data) {
+      const c = document.getElementById('controlCenterContent');
+      if (!data) { c.innerHTML='<div class="cc-empty">No Control Center data available.</div>'; return; }
+      const stateLabel = data.nflState ? `NFL Week ${data.nflState.week} • ${data.nflState.season_type}` : 'NFL state unavailable';
+
+      let html = `
+        <div class="row g-2 g-md-3 mb-3">
+          <div class="col-6 col-lg-3"><div class="cc-stat"><div class="cc-stat-label">Leagues</div><div class="cc-stat-value">${data.leagueData.length}</div><div class="cc-stat-sub">${stateLabel}</div></div></div>
+          <div class="col-6 col-lg-3"><div class="cc-stat"><div class="cc-stat-label">Roster Value</div><div class="cc-stat-value">${Math.round(data.totalValue).toLocaleString()}</div><div class="cc-stat-sub">Blended market value</div></div></div>
+          <div class="col-6 col-lg-3"><div class="cc-stat"><div class="cc-stat-label">Contenders</div><div class="cc-stat-value">${data.contenders}</div><div class="cc-stat-sub">Strong standings + value</div></div></div>
+          <div class="col-6 col-lg-3"><div class="cc-stat"><div class="cc-stat-label">Rebuilds</div><div class="cc-stat-value">${data.rebuilds}</div><div class="cc-stat-sub">Below midpoint in both</div></div></div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-lg-7">
+            <div class="glass-card p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2"><div class="cc-section-title">League Portfolio</div><span class="cc-note">Avg. value rank: ${data.avgValueRank.toFixed(1)}</span></div>
+              <div class="cc-league-row cc-note fw-bold"><div>League</div><div>Standings</div><div>Value Rank</div><div>Value</div><div>Record</div></div>`;
+      data.leagueData.slice().sort((a,b)=>(a.valueRank||99)-(b.valueRank||99)).forEach(x => {
+        const half=Math.ceil(x.rosterCount/2);
+        const badge=x.standingsRank<=half && x.valueRank<=half?'cc-badge-good':x.standingsRank>half&&x.valueRank>half?'cc-badge-warn':'cc-badge-neutral';
+        html += `<div class="cc-league-row"><div class="min-w-0"><div class="cc-mini-value text-truncate">${escapeHtml(x.league.name)}</div><div class="cc-note">${x.rosterCount}-team • ${x.starterValue.toLocaleString()} starter value</div></div><div><div class="cc-mini-label">Rank</div><div class="cc-mini-value">#${x.standingsRank || '-'}</div></div><div><div class="cc-mini-label">Value</div><div class="cc-mini-value"><span class="cc-badge ${badge}">#${x.valueRank || '-'}</span></div></div><div><div class="cc-mini-label">Total</div><div class="cc-mini-value">${x.value.toLocaleString()}</div></div><div><div class="cc-mini-label">Record</div><div class="cc-mini-value">${x.record}</div></div></div>`;
+      });
+      html += `</div></div>
+          <div class="col-lg-5">
+            <div class="glass-card p-3 h-100"><div class="cc-section-title mb-3">Action Items</div>`;
+      data.actions.forEach(a => { html += `<div class="cc-action mb-2"><div class="cc-action-icon"><i class="bi ${a.icon}"></i></div><div><div class="cc-action-title">${escapeHtml(a.title)}</div><div class="cc-action-text">${escapeHtml(a.text)}</div></div></div>`; });
+      html += `</div></div>
+
+          <div class="col-lg-6"><div class="glass-card p-3 h-100"><div class="cc-section-title mb-2">Best Available Waiver Targets</div><div class="cc-note mb-2">Highest-valued unrostered players in each league. This is an inference from current rosters, not Sleeper's official waiver order.</div>`;
+      const waiverRows=[];
+      data.leagueData.forEach(x=>x.available.slice(0,4).forEach(p=>waiverRows.push({...p,league:x.league.name})));
+      const uniqueWaivers=Object.values(Object.fromEntries(waiverRows.sort((a,b)=>b.value-a.value).map(p=>[p.pid,p]))).slice(0,8);
+      if (!uniqueWaivers.length) html += `<div class="cc-empty">No valued waiver targets were found.</div>`;
+      uniqueWaivers.forEach(p=>{ html += `<div class="cc-player-row"><div class="cc-player-main"><div class="cc-player-name">${escapeHtml(p.name)}</div><div class="cc-player-meta">${escapeHtml(p.pos)} • Available in ${data.leagueData.filter(x=>x.available.some(a=>a.pid===p.pid)).length} loaded league(s)</div></div><div class="cc-player-value">${p.value.toLocaleString()}</div></div>`; });
+      html += `</div></div>
+
+          <div class="col-lg-6"><div class="glass-card p-3 h-100"><div class="cc-section-title mb-2">Portfolio Exposure</div><div class="cc-note mb-2">Players you own across the most leagues.</div>`;
+      data.mostExposed.forEach(p=>{ html += `<div class="cc-player-row"><div class="cc-player-main"><div class="cc-player-name">${escapeHtml(getPlayerDisplayName(p.pid))}</div><div class="cc-player-meta">${escapeHtml(getPlayerPosition(p.pid))} • ${p.value.toLocaleString()} market value</div></div><div class="cc-player-value">${p.count}/${data.leagueData.length}</div></div>`; });
+      if (!data.mostExposed.length) html += `<div class="cc-empty">Load league data to see exposure.</div>`;
+      html += `</div></div>
+
+          <div class="col-12"><div class="glass-card p-3"><div class="d-flex justify-content-between align-items-center mb-2"><div class="cc-section-title">Recent Completed Trades</div><div class="cc-note">Public Sleeper transaction history</div></div>`;
+      if (!data.recentTrades.length) html += `<div class="cc-empty">No recent completed trades were returned for the loaded leagues.</div>`;
+      data.recentTrades.forEach(t=>{
+        const names=(t.roster_ids||[]).map(id=>getOwnerNameForRoster(t.league,id)).join(' ↔ ');
+        const assets=[];
+        Object.keys(t.adds||{}).forEach(pid=>assets.push(`${getPlayerDisplayName(pid)} → ${getOwnerNameForRoster(t.league,t.adds[pid])}`));
+        (t.draft_picks||[]).forEach(p=>assets.push(`${formatPick(p)} → ${getOwnerNameForRoster(t.league,p.owner_id)}`));
+        html += `<div class="cc-trade"><div class="cc-trade-head"><span class="cc-trade-title">${escapeHtml(t.league.name)} • ${escapeHtml(names)}</span><span class="cc-trade-date">${formatControlDate(t.created)}</span></div><div class="cc-trade-assets">${escapeHtml(assets.slice(0,6).join(' • ') || 'Trade assets unavailable')}</div></div>`;
+      });
+      html += `</div></div>
+
+          <div class="col-lg-6"><div class="glass-card p-3"><div class="cc-section-title mb-2">My Recent Trades</div>`;
+      const myTrades=data.leagueData.flatMap(x=>x.myTrades.map(t=>({...t,league:x.league}))).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,6);
+      if(!myTrades.length) html += `<div class="cc-empty">No completed trades involving your roster were found.</div>`;
+      myTrades.forEach(t=>{ const names=(t.roster_ids||[]).filter(id=>Number(id)!==Number(t.league.myRoster?.roster_id)).map(id=>getOwnerNameForRoster(t.league,id)).join(', ') || 'League mate'; html += `<div class="cc-trade"><div class="cc-trade-head"><span class="cc-trade-title">${escapeHtml(t.league.name)} • with ${escapeHtml(names)}</span><span class="cc-trade-date">${formatControlDate(t.created)}</span></div><div class="cc-trade-assets">${escapeHtml(Object.keys(t.adds||{}).map(pid=>getPlayerDisplayName(pid)).slice(0,5).join(', ') || 'Pick / FAAB trade')}</div></div>`; });
+      html += `</div></div>
+
+          <div class="col-lg-6"><div class="glass-card p-3"><div class="cc-section-title mb-2">Future Draft Capital</div>`;
+      const picks=data.leagueData.flatMap(x=>x.ownedPicks.map(p=>({...p,league:x.league.name}))).sort((a,b)=>Number(a.season)-Number(b.season)||Number(a.round)-Number(b.round));
+      if(!picks.length) html += `<div class="cc-empty">No future traded picks were returned as currently owned by your rosters.</div>`;
+      picks.slice(0,20).forEach(p=>{ html += `<div class="cc-player-row"><div class="cc-player-main"><div class="cc-player-name">${escapeHtml(formatPick(p))}</div><div class="cc-player-meta">${escapeHtml(p.league)} • original roster #${p.roster_id}</div></div><span class="cc-badge cc-badge-neutral">Owned</span></div>`; });
+      html += `</div></div>
+        </div>
+        <div class="cc-note mt-3">Control Center uses Sleeper's public read-only data plus your existing market-value feeds. Pending trade offers are not exposed by the public Sleeper REST API, so this dashboard intentionally shows completed transactions rather than pretending pending offers are available.</div>`;
+      c.innerHTML=html;
+    }
+
+    async function refreshControlCenter(force = false) {
+      if (!allLeaguesData.length) {
+        document.getElementById('controlCenterContent').innerHTML='<div class="cc-empty">Load your Sleeper data first, then open Control Center.</div>';
+        return;
+      }
+      if (controlCenterState.loading) return;
+      if (controlCenterState.loaded && !force && controlCenterState.data) { renderControlCenter(controlCenterState.data); return; }
+
+      controlCenterState.loading=true;
+      const btn=document.getElementById('ccRefreshBtn');
+      if(btn){ btn.disabled=true; btn.innerHTML='<i class="bi bi-arrow-repeat cc-refresh-spin me-1"></i>Refreshing'; }
+      document.getElementById('controlCenterContent').innerHTML='<div class="cc-empty"><div class="spinner-border spinner-border-sm text-primary mb-2"></div><div>Scanning your leagues…</div><div class="cc-note mt-2">Transactions, traded picks, waiver opportunities and roster signals.</div></div>';
+
+      try {
+        const statePromise=fetchJson('https://api.sleeper.app/v1/state/nfl').catch(()=>null);
+        const nflState=await statePromise;
+        const week=Math.max(1, Number(nflState?.week || 1));
+        const weeks=[...new Set([Math.max(1,week),Math.max(1,week-1),Math.max(1,week-2)])];
+        const leagueData=await mapWithConcurrency(allLeaguesData,3,(lg)=>fetchLeagueControlData(lg,weeks));
+        const valid=leagueData.filter(Boolean);
+        controlCenterState.data=buildControlCenterData(valid,nflState);
+        controlCenterState.loaded=true;
+        controlCenterState.lastRefresh=Date.now();
+        renderControlCenter(controlCenterState.data);
+      } catch(err) {
+        document.getElementById('controlCenterContent').innerHTML=`<div class="cc-empty text-danger">Control Center could not refresh: ${escapeHtml(err.message || 'Unknown error')}</div>`;
+      } finally {
+        controlCenterState.loading=false;
+        if(btn){ btn.disabled=false; btn.innerHTML='<i class="bi bi-arrow-clockwise me-1"></i>Refresh'; }
       }
     }
 
