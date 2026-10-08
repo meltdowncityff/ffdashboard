@@ -369,6 +369,46 @@
     }
     .remove-btn:hover { color: #fca5a5; transform: scale(1.1); }
 
+    .trade-autocomplete {
+      position: relative;
+    }
+    .trade-suggestions {
+      position: absolute;
+      z-index: 1080;
+      left: 0;
+      right: 3.25rem;
+      top: calc(100% + 6px);
+      max-height: 300px;
+      overflow-y: auto;
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.45);
+      backdrop-filter: blur(16px);
+    }
+    .trade-suggestion {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #fff;
+      text-align: left;
+      padding: .7rem .85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      cursor: pointer;
+    }
+    .trade-suggestion:hover, .trade-suggestion.active {
+      background: rgba(99,102,241,.22);
+    }
+    .trade-suggestion-name { font-weight: 700; }
+    .trade-suggestion-meta { color: #94a3b8; font-size: .78rem; white-space: nowrap; }
+    .cc-player-row.cc-available-player { cursor: pointer; }
+    .cc-player-row.cc-available-player:hover {
+      background: rgba(99,102,241,.10) !important;
+    }
+
     footer {
       margin-top: auto;
       border-top: 1px solid var(--border-subtle);
@@ -1122,14 +1162,15 @@
           </div>
         </div>
         
-        <datalist id="playerSearchList"></datalist>
-
         <div class="row g-4">
           <!-- Team A -->
           <div class="col-md-6">
-            <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideA" class="form-control glass-input" list="playerSearchList" placeholder="Search player or pick (e.g. 2027 1st)...">
-              <button class="btn btn-primary" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
+            <div class="d-flex gap-2 mb-3 trade-autocomplete">
+              <div class="flex-grow-1 position-relative">
+                <input type="text" id="inputSideA" class="form-control glass-input" autocomplete="off" placeholder="Search player or pick (e.g. 2027 1st)..." aria-label="Team A player or pick">
+                <div id="tradeSuggestionsA" class="trade-suggestions d-none"></div>
+              </div>
+              <button type="button" class="btn btn-primary align-self-start" onclick="addPlayerToTrade('A')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side shadow-sm" id="listSideA"></div>
             <div class="mt-3 d-flex justify-content-between align-items-center bg-black bg-opacity-25 p-3 rounded-3">
@@ -1140,9 +1181,12 @@
 
           <!-- Team B -->
           <div class="col-md-6">
-            <div class="d-flex gap-2 mb-3">
-              <input type="text" id="inputSideB" class="form-control glass-input" list="playerSearchList" placeholder="Search player or pick (e.g. 2027 1st)...">
-              <button class="btn btn-primary" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
+            <div class="d-flex gap-2 mb-3 trade-autocomplete">
+              <div class="flex-grow-1 position-relative">
+                <input type="text" id="inputSideB" class="form-control glass-input" autocomplete="off" placeholder="Search player or pick (e.g. 2027 1st)..." aria-label="Team B player or pick">
+                <div id="tradeSuggestionsB" class="trade-suggestions d-none"></div>
+              </div>
+              <button type="button" class="btn btn-primary align-self-start" onclick="addPlayerToTrade('B')"><i class="bi bi-plus-lg"></i></button>
             </div>
             <div class="trade-side shadow-sm" id="listSideB"></div>
             <div class="mt-3 d-flex justify-content-between align-items-center bg-black bg-opacity-25 p-3 rounded-3">
@@ -1252,6 +1296,23 @@
     </div>
   </div>
 
+  <!-- Available Player Quick View -->
+  <div class="modal fade" id="availablePlayerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-white" style="background: rgba(15, 23, 42, 0.97); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.1);">
+        <div class="modal-header border-bottom border-secondary border-opacity-25">
+          <h5 class="modal-title fw-bold" id="availablePlayerTitle">Player</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="availablePlayerBody"></div>
+        <div class="modal-footer border-top border-secondary border-opacity-25">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="availablePlayerAnalyzeBtn"><i class="bi bi-bar-chart-fill me-1"></i>Analyze in Trade Analyzer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let nflPlayersDb = {}; 
@@ -1318,6 +1379,15 @@
         document.getElementById(`inputSide${side}`)?.addEventListener('keydown', e => {
           if (e.key === 'Enter') { e.preventDefault(); addPlayerToTrade(side); }
         });
+      });
+      initTradeAutocomplete('A');
+      initTradeAutocomplete('B');
+
+      document.addEventListener('click', e => {
+        if (!e.target.closest('.trade-autocomplete')) {
+          hideTradeSuggestions('A');
+          hideTradeSuggestions('B');
+        }
       });
     });
 
@@ -2003,6 +2073,92 @@
       });
     }
 
+    let tradeSuggestionIndex = { A: -1, B: -1 };
+
+    function getTradeSearchOptions(term) {
+      const q = String(term || '').trim().toLowerCase();
+      if (!q) return [];
+
+      return Object.keys(nflPlayersDb)
+        .map(pid => {
+          const p = nflPlayersDb[pid] || {};
+          const name = getPlayerDisplayName(pid);
+          const pos = getPlayerPosition(pid) || p.position || 'ASSET';
+          const team = p.team || 'FA';
+          return { pid, name, pos, team };
+        })
+        .filter(x => ['QB','RB','WR','TE','K','DEF','PICK'].includes(x.pos))
+        .filter(x => `${x.name} ${x.pos} ${x.team} ${x.pid}`.toLowerCase().includes(q))
+        .sort((a,b) => {
+          const an = a.name.toLowerCase(), bn = b.name.toLowerCase();
+          const ae = an === q ? 0 : an.startsWith(q) ? 1 : 2;
+          const be = bn === q ? 0 : bn.startsWith(q) ? 1 : 2;
+          return ae - be || an.localeCompare(bn);
+        })
+        .slice(0, 10);
+    }
+
+    function showTradeSuggestions(side, term) {
+      const box = document.getElementById(`tradeSuggestions${side}`);
+      if (!box) return;
+      const options = getTradeSearchOptions(term);
+      tradeSuggestionIndex[side] = -1;
+      if (!term.trim() || !options.length) {
+        hideTradeSuggestions(side);
+        return;
+      }
+
+      box.innerHTML = options.map((x, i) => `
+        <button type="button" class="trade-suggestion" data-index="${i}" data-pid="${escapeHtml(x.pid)}" onclick="selectTradeSuggestion('${side}','${escapeHtml(x.pid)}')">
+          <span class="trade-suggestion-name">${escapeHtml(x.name)}</span>
+          <span class="trade-suggestion-meta">${escapeHtml(x.pos)} • ${escapeHtml(x.team)}</span>
+        </button>`).join('');
+      box.classList.remove('d-none');
+    }
+
+    function hideTradeSuggestions(side) {
+      const box = document.getElementById(`tradeSuggestions${side}`);
+      if (box) box.classList.add('d-none');
+      tradeSuggestionIndex[side] = -1;
+    }
+
+    function selectTradeSuggestion(side, pid) {
+      const input = document.getElementById(`inputSide${side}`);
+      if (!input || !nflPlayersDb[pid]) return;
+      input.value = getPlayerDisplayName(pid);
+      hideTradeSuggestions(side);
+      addPlayerToTrade(side);
+    }
+
+    function initTradeAutocomplete(side) {
+      const input = document.getElementById(`inputSide${side}`);
+      if (!input) return;
+
+      input.addEventListener('input', e => showTradeSuggestions(side, e.target.value));
+      input.addEventListener('focus', e => {
+        if (e.target.value.trim()) showTradeSuggestions(side, e.target.value);
+      });
+      input.addEventListener('keydown', e => {
+        const box = document.getElementById(`tradeSuggestions${side}`);
+        const items = box ? [...box.querySelectorAll('.trade-suggestion')] : [];
+        if (!items.length || box.classList.contains('d-none')) return;
+
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          const delta = e.key === 'ArrowDown' ? 1 : -1;
+          tradeSuggestionIndex[side] = (tradeSuggestionIndex[side] + delta + items.length) % items.length;
+          items.forEach((item, i) => item.classList.toggle('active', i === tradeSuggestionIndex[side]));
+          return;
+        }
+        if (e.key === 'Enter' && tradeSuggestionIndex[side] >= 0) {
+          e.preventDefault();
+          selectTradeSuggestion(side, items[tradeSuggestionIndex[side]].dataset.pid);
+          return;
+        }
+        if (e.key === 'Escape') hideTradeSuggestions(side);
+      });
+    }
+
     function addPlayerToTrade(side) {
       const input = document.getElementById(side === 'A' ? 'inputSideA' : 'inputSideB');
       const val = input.value.trim();
@@ -2398,9 +2554,9 @@
         const leagueId = targetLeague?.league?.league_id || '';
         html += `
           <button type="button"
-            class="cc-player-row cc-clickable w-100 text-start bg-transparent border-0 text-white"
-            onclick="controlCenterAnalyzePlayer('${escapeHtml(p.pid)}','${escapeHtml(leagueId)}')"
-            title="Analyze ${escapeHtml(p.name)}">
+            class="cc-player-row cc-clickable cc-available-player w-100 text-start bg-transparent border-0 text-white"
+            onclick="openAvailablePlayer('${escapeHtml(p.pid)}','${escapeHtml(leagueId)}')"
+            title="View ${escapeHtml(p.name)}">
             <div class="cc-player-main">
               <div class="cc-player-name">${escapeHtml(p.name)}</div>
               <div class="cc-player-meta">${escapeHtml(p.pos)} • Available in ${data.leagueData.filter(x=>x.available.some(a=>a.pid===p.pid)).length} loaded league(s)</div>
@@ -2554,6 +2710,35 @@
         </div>`;
 
       c.innerHTML=html;
+    }
+
+    function openAvailablePlayer(pid, leagueId='') {
+      const p = nflPlayersDb[pid];
+      if (!p) return;
+      const name = getPlayerDisplayName(pid);
+      const pos = getPlayerPosition(pid) || p.position || 'ASSET';
+      const team = p.team || 'FA';
+      const value = getPlayerMarketValue(pid);
+      const leaguesAvailable = (allLeaguesData || []).filter(lg =>
+        (lg.myRoster?.players || []).every(id => String(id) !== String(pid))
+      );
+
+      document.getElementById('availablePlayerTitle').innerText = name;
+      document.getElementById('availablePlayerBody').innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div><span class="badge bg-secondary me-2">${escapeHtml(pos)}</span><span class="text-muted">${escapeHtml(team)}</span></div>
+          <div class="fs-4 fw-bold text-info">${value > 0 ? value.toLocaleString() : 'N/A'}</div>
+        </div>
+        <div class="small text-muted mb-2">Available based on the loaded rosters.</div>
+        <div class="small">${leaguesAvailable.length} loaded league${leaguesAvailable.length === 1 ? '' : 's'} currently show this player as unrostered.</div>`;
+
+      const analyzeBtn = document.getElementById('availablePlayerAnalyzeBtn');
+      if (analyzeBtn) analyzeBtn.onclick = () => {
+        bootstrap.Modal.getInstance(document.getElementById('availablePlayerModal'))?.hide();
+        controlCenterAnalyzePlayer(pid, leagueId);
+      };
+
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('availablePlayerModal')).show();
     }
 
     function controlCenterAnalyzePlayer(pid, leagueId='') {
