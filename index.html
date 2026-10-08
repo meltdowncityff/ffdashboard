@@ -981,7 +981,16 @@
     .cc-stat-value { margin-top:.18rem; font-family:'Plus Jakarta Sans',sans-serif; font-size:1.55rem; font-weight:800; color:#f8fafc; }
     .cc-stat-sub { margin-top:.12rem; color:#94a3b8; font-size:.72rem; }
     .cc-section-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1rem; font-weight:800; color:#f8fafc; }
-    .cc-action { display:flex; gap:.8rem; align-items:flex-start; padding:.8rem .9rem; border:1px solid var(--border-subtle); border-radius:12px; background:rgba(255,255,255,.025); }
+    .cc-action { display:flex; gap:.8rem; align-items:flex-start; padding:.8rem .9rem; border:1px solid var(--border-subtle); border-radius:12px; background:rgba(255,255,255,.025); transition:background .18s ease,border-color .18s ease,transform .18s ease; }
+    .cc-action.cc-clickable { cursor:pointer; }
+    .cc-action.cc-clickable:hover { background:rgba(99,102,241,.10); border-color:rgba(129,140,248,.30); transform:translateY(-1px); }
+    .cc-action:focus-visible { outline:none; box-shadow:0 0 0 2px rgba(129,140,248,.45); }
+    .cc-clickable { cursor:pointer; }
+    .cc-clickable:hover { background:rgba(99,102,241,.065); }
+    .cc-clickable:focus-visible { outline:none; box-shadow:inset 0 0 0 2px rgba(129,140,248,.35); }
+    .cc-row-action { color:#818cf8; font-size:.72rem; font-weight:800; white-space:nowrap; opacity:.85; }
+    .cc-player-row.cc-clickable { margin:0 -.35rem; padding-left:.35rem; padding-right:.35rem; border-radius:9px; }
+    .cc-trade.cc-clickable { padding-left:.45rem; padding-right:.45rem; border-radius:9px; }
     .cc-action-icon { width:34px; height:34px; flex:0 0 34px; display:grid; place-items:center; border-radius:10px; background:rgba(99,102,241,.12); color:#a5b4fc; }
     .cc-action-title { font-weight:750; font-size:.86rem; color:#f8fafc; }
     .cc-action-text { color:#94a3b8; font-size:.75rem; line-height:1.45; margin-top:.12rem; }
@@ -2245,10 +2254,10 @@
       const actions = [];
       leagueData.forEach(x => {
         const half = Math.ceil(x.rosterCount/2);
-        if (x.standingsRank && x.valueRank && x.standingsRank <= half && x.valueRank <= half) actions.push({icon:'bi-fire',title:`Contender: ${x.league.name}`,text:`You are ${x.standingsRank}/${x.rosterCount} in the standings and ${x.valueRank}/${x.rosterCount} by market value.`});
-        else if (x.standingsRank && x.valueRank && x.standingsRank > half && x.valueRank <= half) actions.push({icon:'bi-graph-up-arrow',title:`Buy window: ${x.league.name}`,text:`Your roster ranks ${x.valueRank} by value but ${x.standingsRank} in the standings. You may be underperforming.`});
-        else if (x.standingsRank && x.valueRank && x.standingsRank <= half && x.valueRank > half) actions.push({icon:'bi-exclamation-triangle',title:`Fragile contender: ${x.league.name}`,text:`The standings are ahead of the roster's market value. Protect this season without overpaying.`});
-        else if (x.standingsRank && x.valueRank && x.standingsRank > half && x.valueRank > half) actions.push({icon:'bi-arrow-down-right',title:`Rebuild candidate: ${x.league.name}`,text:`Both standings and market value are below the league midpoint. Future picks and younger assets deserve extra weight.`});
+        if (x.standingsRank && x.valueRank && x.standingsRank <= half && x.valueRank <= half) actions.push({leagueId:x.league.league_id,icon:'bi-fire',title:`Contender: ${x.league.name}`,text:`You are ${x.standingsRank}/${x.rosterCount} in the standings and ${x.valueRank}/${x.rosterCount} by market value.`});
+        else if (x.standingsRank && x.valueRank && x.standingsRank > half && x.valueRank <= half) actions.push({leagueId:x.league.league_id,icon:'bi-graph-up-arrow',title:`Buy window: ${x.league.name}`,text:`Your roster ranks ${x.valueRank} by value but ${x.standingsRank} in the standings. You may be underperforming.`});
+        else if (x.standingsRank && x.valueRank && x.standingsRank <= half && x.valueRank > half) actions.push({leagueId:x.league.league_id,icon:'bi-exclamation-triangle',title:`Fragile contender: ${x.league.name}`,text:`The standings are ahead of the roster's market value. Protect this season without overpaying.`});
+        else if (x.standingsRank && x.valueRank && x.standingsRank > half && x.valueRank > half) actions.push({leagueId:x.league.league_id,icon:'bi-arrow-down-right',title:`Rebuild candidate: ${x.league.name}`,text:`Both standings and market value are below the league midpoint. Future picks and younger assets deserve extra weight.`});
       });
       if (mostExposed[0]?.count > Math.max(1, Math.floor(leagueData.length/2))) actions.push({icon:'bi-collection',title:`High exposure: ${getPlayerDisplayName(mostExposed[0].pid)}`,text:`You roster this player in ${mostExposed[0].count} of ${leagueData.length} leagues. Consider diversification if his value moves sharply.`});
       if (!actions.length) actions.push({icon:'bi-check2-circle',title:'No major flags',text:'Your loaded leagues do not currently trigger the Control Center\'s basic contender/rebuild rules.'});
@@ -2259,70 +2268,315 @@
     function renderControlCenter(data) {
       const c = document.getElementById('controlCenterContent');
       if (!data) { c.innerHTML='<div class="cc-empty">No Control Center data available.</div>'; return; }
-      const stateLabel = data.nflState ? `NFL Week ${data.nflState.week} • ${data.nflState.season_type}` : 'NFL state unavailable';
+
+      const stateLabel = data.nflState
+        ? `NFL Week ${data.nflState.week} • ${data.nflState.season_type}`
+        : 'NFL state unavailable';
+
+      const leagueAction = (leagueId, label='View roster') =>
+        `<span class="cc-row-action"><i class="bi bi-chevron-right me-1"></i>${label}</span>`;
 
       let html = `
         <div class="row g-2 g-md-3 mb-3">
-          <div class="col-6 col-lg-3"><div class="cc-stat"><div class="cc-stat-label">Leagues</div><div class="cc-stat-value">${data.leagueData.length}</div><div class="cc-stat-sub">${stateLabel}</div></div></div>
-          <div class="col-6 col-lg-3"><div class="cc-stat"><div class="cc-stat-label">Roster Value</div><div class="cc-stat-value">${Math.round(data.totalValue).toLocaleString()}</div><div class="cc-stat-sub">Blended market value</div></div></div>
-          <div class="col-6 col-lg-3"><div class="cc-stat"><div class="cc-stat-label">Contenders</div><div class="cc-stat-value">${data.contenders}</div><div class="cc-stat-sub">Strong standings + value</div></div></div>
-          <div class="col-6 col-lg-3"><div class="cc-stat"><div class="cc-stat-label">Rebuilds</div><div class="cc-stat-value">${data.rebuilds}</div><div class="cc-stat-sub">Below midpoint in both</div></div></div>
+          <div class="col-6 col-lg-3">
+            <div class="cc-stat">
+              <div class="cc-stat-label">Leagues</div>
+              <div class="cc-stat-value">${data.leagueData.length}</div>
+              <div class="cc-stat-sub">${stateLabel}</div>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="cc-stat">
+              <div class="cc-stat-label">Roster Value</div>
+              <div class="cc-stat-value">${Math.round(data.totalValue).toLocaleString()}</div>
+              <div class="cc-stat-sub">Blended market value</div>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="cc-stat">
+              <div class="cc-stat-label">Contenders</div>
+              <div class="cc-stat-value">${data.contenders}</div>
+              <div class="cc-stat-sub">Strong standings + value</div>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="cc-stat">
+              <div class="cc-stat-label">Rebuilds</div>
+              <div class="cc-stat-value">${data.rebuilds}</div>
+              <div class="cc-stat-sub">Below midpoint in both</div>
+            </div>
+          </div>
         </div>
 
         <div class="row g-3">
           <div class="col-lg-7">
             <div class="glass-card p-3 h-100">
-              <div class="d-flex justify-content-between align-items-center mb-2"><div class="cc-section-title">League Portfolio</div><span class="cc-note">Avg. value rank: ${data.avgValueRank.toFixed(1)}</span></div>
-              <div class="cc-league-row cc-note fw-bold"><div>League</div><div>Standings</div><div>Value Rank</div><div>Value</div><div>Record</div></div>`;
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="cc-section-title">League Portfolio</div>
+                <span class="cc-note">Avg. value rank: ${data.avgValueRank.toFixed(1)}</span>
+              </div>
+              <div class="cc-league-row cc-note fw-bold">
+                <div>League</div><div>Standings</div><div>Value Rank</div><div>Value</div><div>Record</div>
+              </div>`;
+
       data.leagueData.slice().sort((a,b)=>(a.valueRank||99)-(b.valueRank||99)).forEach(x => {
         const half=Math.ceil(x.rosterCount/2);
-        const badge=x.standingsRank<=half && x.valueRank<=half?'cc-badge-good':x.standingsRank>half&&x.valueRank>half?'cc-badge-warn':'cc-badge-neutral';
-        html += `<div class="cc-league-row"><div class="min-w-0"><div class="cc-mini-value text-truncate">${escapeHtml(x.league.name)}</div><div class="cc-note">${x.rosterCount}-team • ${x.starterValue.toLocaleString()} starter value</div></div><div><div class="cc-mini-label">Rank</div><div class="cc-mini-value">#${x.standingsRank || '-'}</div></div><div><div class="cc-mini-label">Value</div><div class="cc-mini-value"><span class="cc-badge ${badge}">#${x.valueRank || '-'}</span></div></div><div><div class="cc-mini-label">Total</div><div class="cc-mini-value">${x.value.toLocaleString()}</div></div><div><div class="cc-mini-label">Record</div><div class="cc-mini-value">${x.record}</div></div></div>`;
-      });
-      html += `</div></div>
-          <div class="col-lg-5">
-            <div class="glass-card p-3 h-100"><div class="cc-section-title mb-3">Action Items</div>`;
-      data.actions.forEach(a => { html += `<div class="cc-action mb-2"><div class="cc-action-icon"><i class="bi ${a.icon}"></i></div><div><div class="cc-action-title">${escapeHtml(a.title)}</div><div class="cc-action-text">${escapeHtml(a.text)}</div></div></div>`; });
-      html += `</div></div>
+        const badge=x.standingsRank<=half && x.valueRank<=half
+          ? 'cc-badge-good'
+          : x.standingsRank>half && x.valueRank>half
+            ? 'cc-badge-warn'
+            : 'cc-badge-neutral';
 
-          <div class="col-lg-6"><div class="glass-card p-3 h-100"><div class="cc-section-title mb-2">Best Available Waiver Targets</div><div class="cc-note mb-2">Highest-valued unrostered players in each league. This is an inference from current rosters, not Sleeper's official waiver order.</div>`;
+        html += `
+          <button type="button"
+            class="cc-league-row cc-clickable w-100 text-start border-0 text-white"
+            onclick="openRoster('${escapeHtml(x.league.league_id)}')"
+            title="Open ${escapeHtml(x.league.name)} roster">
+            <div class="min-w-0">
+              <div class="cc-mini-value text-truncate">${escapeHtml(x.league.name)}</div>
+              <div class="cc-note">${x.rosterCount}-team • ${x.starterValue.toLocaleString()} starter value</div>
+            </div>
+            <div><div class="cc-mini-label">Rank</div><div class="cc-mini-value">#${x.standingsRank || '-'}</div></div>
+            <div><div class="cc-mini-label">Value</div><div class="cc-mini-value"><span class="cc-badge ${badge}">#${x.valueRank || '-'}</span></div></div>
+            <div><div class="cc-mini-label">Total</div><div class="cc-mini-value">${x.value.toLocaleString()}</div></div>
+            <div><div class="cc-mini-label">Record</div><div class="cc-mini-value">${x.record}</div></div>
+          </button>`;
+      });
+
+      html += `
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="glass-card p-3 h-100">
+              <div class="cc-section-title mb-3">Action Items</div>`;
+
+      data.actions.forEach((a, index) => {
+        const leagueId = a.leagueId || '';
+        const click = leagueId
+          ? `onclick="openRoster('${escapeHtml(leagueId)}')"`
+          : '';
+        const clickable = leagueId ? 'cc-clickable' : '';
+        const actionHint = leagueId ? '<span class="cc-row-action d-block mt-1">Open league <i class="bi bi-chevron-right"></i></span>' : '';
+
+        html += `
+          <div class="cc-action ${clickable} mb-2"
+               ${click}
+               ${leagueId ? 'tabindex="0" role="button"' : ''}
+               ${leagueId ? `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRoster('${escapeHtml(leagueId)}')}"` : ''}>
+            <div class="cc-action-icon"><i class="bi ${a.icon}"></i></div>
+            <div class="flex-grow-1">
+              <div class="cc-action-title">${escapeHtml(a.title)}</div>
+              <div class="cc-action-text">${escapeHtml(a.text)}</div>
+              ${actionHint}
+            </div>
+          </div>`;
+      });
+
+      html += `
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="glass-card p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="cc-section-title">Best Available Waiver Targets</div>
+                <span class="cc-note">Click to analyze</span>
+              </div>
+              <div class="cc-note mb-2">Highest-valued unrostered players in each league. This is an inference from current rosters, not Sleeper's official waiver order.</div>`;
+
       const waiverRows=[];
       data.leagueData.forEach(x=>x.available.slice(0,4).forEach(p=>waiverRows.push({...p,league:x.league.name})));
-      const uniqueWaivers=Object.values(Object.fromEntries(waiverRows.sort((a,b)=>b.value-a.value).map(p=>[p.pid,p]))).slice(0,8);
+      const uniqueWaivers=Object.values(
+        Object.fromEntries(waiverRows.sort((a,b)=>b.value-a.value).map(p=>[p.pid,p]))
+      ).slice(0,8);
+
       if (!uniqueWaivers.length) html += `<div class="cc-empty">No valued waiver targets were found.</div>`;
-      uniqueWaivers.forEach(p=>{ html += `<div class="cc-player-row"><div class="cc-player-main"><div class="cc-player-name">${escapeHtml(p.name)}</div><div class="cc-player-meta">${escapeHtml(p.pos)} • Available in ${data.leagueData.filter(x=>x.available.some(a=>a.pid===p.pid)).length} loaded league(s)</div></div><div class="cc-player-value">${p.value.toLocaleString()}</div></div>`; });
-      html += `</div></div>
 
-          <div class="col-lg-6"><div class="glass-card p-3 h-100"><div class="cc-section-title mb-2">Portfolio Exposure</div><div class="cc-note mb-2">Players you own across the most leagues.</div>`;
-      data.mostExposed.forEach(p=>{ html += `<div class="cc-player-row"><div class="cc-player-main"><div class="cc-player-name">${escapeHtml(getPlayerDisplayName(p.pid))}</div><div class="cc-player-meta">${escapeHtml(getPlayerPosition(p.pid))} • ${p.value.toLocaleString()} market value</div></div><div class="cc-player-value">${p.count}/${data.leagueData.length}</div></div>`; });
+      uniqueWaivers.forEach(p => {
+        const targetLeague = data.leagueData.find(x => x.available.some(a => a.pid === p.pid));
+        const leagueId = targetLeague?.league?.league_id || '';
+        html += `
+          <button type="button"
+            class="cc-player-row cc-clickable w-100 text-start bg-transparent border-0 text-white"
+            onclick="controlCenterAnalyzePlayer('${escapeHtml(p.pid)}','${escapeHtml(leagueId)}')"
+            title="Analyze ${escapeHtml(p.name)}">
+            <div class="cc-player-main">
+              <div class="cc-player-name">${escapeHtml(p.name)}</div>
+              <div class="cc-player-meta">${escapeHtml(p.pos)} • Available in ${data.leagueData.filter(x=>x.available.some(a=>a.pid===p.pid)).length} loaded league(s)</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <div class="cc-player-value">${p.value.toLocaleString()}</div>
+              <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+          </button>`;
+      });
+
+      html += `
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="glass-card p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="cc-section-title">Portfolio Exposure</div>
+                <span class="cc-note">Click for leagues</span>
+              </div>
+              <div class="cc-note mb-2">Players you own across the most leagues.</div>`;
+
+      data.mostExposed.forEach(p => {
+        html += `
+          <button type="button"
+            class="cc-player-row cc-clickable w-100 text-start bg-transparent border-0 text-white"
+            onclick="openSharesModal('${escapeHtml(p.pid)}')"
+            title="See ${escapeHtml(getPlayerDisplayName(p.pid))} ownership">
+            <div class="cc-player-main">
+              <div class="cc-player-name">${escapeHtml(getPlayerDisplayName(p.pid))}</div>
+              <div class="cc-player-meta">${escapeHtml(getPlayerPosition(p.pid))} • ${p.value.toLocaleString()} market value</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <div class="cc-player-value">${p.count}/${data.leagueData.length}</div>
+              <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+          </button>`;
+      });
+
       if (!data.mostExposed.length) html += `<div class="cc-empty">Load league data to see exposure.</div>`;
-      html += `</div></div>
 
-          <div class="col-12"><div class="glass-card p-3"><div class="d-flex justify-content-between align-items-center mb-2"><div class="cc-section-title">Recent Completed Trades</div><div class="cc-note">Public Sleeper transaction history</div></div>`;
+      html += `
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="glass-card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="cc-section-title">Recent Completed Trades</div>
+                <div class="cc-note">Click a trade to open the league roster</div>
+              </div>`;
+
       if (!data.recentTrades.length) html += `<div class="cc-empty">No recent completed trades were returned for the loaded leagues.</div>`;
-      data.recentTrades.forEach(t=>{
+
+      data.recentTrades.forEach(t => {
         const names=(t.roster_ids||[]).map(id=>getOwnerNameForRoster(t.league,id)).join(' ↔ ');
         const assets=[];
         Object.keys(t.adds||{}).forEach(pid=>assets.push(`${getPlayerDisplayName(pid)} → ${getOwnerNameForRoster(t.league,t.adds[pid])}`));
         (t.draft_picks||[]).forEach(p=>assets.push(`${formatPick(p)} → ${getOwnerNameForRoster(t.league,p.owner_id)}`));
-        html += `<div class="cc-trade"><div class="cc-trade-head"><span class="cc-trade-title">${escapeHtml(t.league.name)} • ${escapeHtml(names)}</span><span class="cc-trade-date">${formatControlDate(t.created)}</span></div><div class="cc-trade-assets">${escapeHtml(assets.slice(0,6).join(' • ') || 'Trade assets unavailable')}</div></div>`;
+
+        html += `
+          <button type="button"
+            class="cc-trade cc-clickable w-100 text-start bg-transparent border-0 text-white"
+            onclick="openRoster('${escapeHtml(t.league.league_id)}')"
+            title="Open ${escapeHtml(t.league.name)} roster">
+            <div class="cc-trade-head">
+              <span class="cc-trade-title">${escapeHtml(t.league.name)} • ${escapeHtml(names)}</span>
+              <span class="cc-trade-date">${formatControlDate(t.created)}</span>
+            </div>
+            <div class="cc-trade-assets">${escapeHtml(assets.slice(0,6).join(' • ') || 'Trade assets unavailable')}</div>
+          </button>`;
       });
-      html += `</div></div>
 
-          <div class="col-lg-6"><div class="glass-card p-3"><div class="cc-section-title mb-2">My Recent Trades</div>`;
-      const myTrades=data.leagueData.flatMap(x=>x.myTrades.map(t=>({...t,league:x.league}))).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,6);
+      html += `
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="glass-card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="cc-section-title">My Recent Trades</div>
+                <div class="cc-note">Click to open league</div>
+              </div>`;
+
+      const myTrades=data.leagueData.flatMap(x=>x.myTrades.map(t=>({...t,league:x.league})))
+        .sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,6);
+
       if(!myTrades.length) html += `<div class="cc-empty">No completed trades involving your roster were found.</div>`;
-      myTrades.forEach(t=>{ const names=(t.roster_ids||[]).filter(id=>Number(id)!==Number(t.league.myRoster?.roster_id)).map(id=>getOwnerNameForRoster(t.league,id)).join(', ') || 'League mate'; html += `<div class="cc-trade"><div class="cc-trade-head"><span class="cc-trade-title">${escapeHtml(t.league.name)} • with ${escapeHtml(names)}</span><span class="cc-trade-date">${formatControlDate(t.created)}</span></div><div class="cc-trade-assets">${escapeHtml(Object.keys(t.adds||{}).map(pid=>getPlayerDisplayName(pid)).slice(0,5).join(', ') || 'Pick / FAAB trade')}</div></div>`; });
-      html += `</div></div>
 
-          <div class="col-lg-6"><div class="glass-card p-3"><div class="cc-section-title mb-2">Future Draft Capital</div>`;
-      const picks=data.leagueData.flatMap(x=>x.ownedPicks.map(p=>({...p,league:x.league.name}))).sort((a,b)=>Number(a.season)-Number(b.season)||Number(a.round)-Number(b.round));
+      myTrades.forEach(t => {
+        const names=(t.roster_ids||[])
+          .filter(id=>Number(id)!==Number(t.league.myRoster?.roster_id))
+          .map(id=>getOwnerNameForRoster(t.league,id)).join(', ') || 'League mate';
+
+        html += `
+          <button type="button"
+            class="cc-trade cc-clickable w-100 text-start bg-transparent border-0 text-white"
+            onclick="openRoster('${escapeHtml(t.league.league_id)}')"
+            title="Open ${escapeHtml(t.league.name)} roster">
+            <div class="cc-trade-head">
+              <span class="cc-trade-title">${escapeHtml(t.league.name)} • with ${escapeHtml(names)}</span>
+              <span class="cc-trade-date">${formatControlDate(t.created)}</span>
+            </div>
+            <div class="cc-trade-assets">${escapeHtml(Object.keys(t.adds||{}).map(pid=>getPlayerDisplayName(pid)).slice(0,5).join(', ') || 'Pick / FAAB trade')}</div>
+          </button>`;
+      });
+
+      html += `
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="glass-card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="cc-section-title">Future Draft Capital</div>
+                <div class="cc-note">Click to open league</div>
+              </div>`;
+
+      const picks=data.leagueData
+        .flatMap(x=>x.ownedPicks.map(p=>({...p,league:x.league})))
+        .sort((a,b)=>Number(a.season)-Number(b.season)||Number(a.round)-Number(b.round));
+
       if(!picks.length) html += `<div class="cc-empty">No future traded picks were returned as currently owned by your rosters.</div>`;
-      picks.slice(0,20).forEach(p=>{ html += `<div class="cc-player-row"><div class="cc-player-main"><div class="cc-player-name">${escapeHtml(formatPick(p))}</div><div class="cc-player-meta">${escapeHtml(p.league)} • original roster #${p.roster_id}</div></div><span class="cc-badge cc-badge-neutral">Owned</span></div>`; });
-      html += `</div></div>
+
+      picks.slice(0,20).forEach(p => {
+        html += `
+          <button type="button"
+            class="cc-player-row cc-clickable w-100 text-start bg-transparent border-0 text-white"
+            onclick="openRoster('${escapeHtml(p.league.league_id)}')"
+            title="Open ${escapeHtml(p.league.name)}">
+            <div class="cc-player-main">
+              <div class="cc-player-name">${escapeHtml(formatPick(p))}</div>
+              <div class="cc-player-meta">${escapeHtml(p.league.name)} • original roster #${p.roster_id}</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="cc-badge cc-badge-neutral">Owned</span>
+              <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+          </button>`;
+      });
+
+      html += `
+            </div>
+          </div>
         </div>
-        <div class="cc-note mt-3">Control Center uses Sleeper's public read-only data plus your existing market-value feeds. Pending trade offers are not exposed by the public Sleeper REST API, so this dashboard intentionally shows completed transactions rather than pretending pending offers are available.</div>`;
+        <div class="cc-note mt-3">
+          Control Center uses Sleeper's public read-only data plus your existing market-value feeds.
+          Pending trade offers are not exposed by the public Sleeper REST API, so this dashboard shows
+          completed transactions rather than pretending pending offers are available.
+        </div>`;
+
       c.innerHTML=html;
+    }
+
+    function controlCenterAnalyzePlayer(pid, leagueId='') {
+      if (!nflPlayersDb[pid]) return;
+
+      const name = getPlayerDisplayName(pid);
+      const input = document.getElementById('inputSideA');
+
+      tradeSideA = [pid];
+      tradeSideB = [];
+      if (input) input.value = '';
+
+      switchTab('analyzerTab', document.querySelector('.custom-tab:nth-child(3)'));
+      updateTradeAnalyzer();
+
+      const verdict = document.getElementById('tradeVerdict');
+      if (verdict) verdict.scrollIntoView({ behavior:'smooth', block:'center' });
+
+      if (leagueId) {
+        // Keep the league context available without forcing a second data load.
+        const lg = allLeaguesData.find(x => x.league_id === leagueId);
+        if (lg) localStorage.setItem('ffaddict_last_cc_league', lg.league_id);
+      }
     }
 
     async function refreshControlCenter(force = false) {
